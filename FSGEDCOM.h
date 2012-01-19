@@ -8,6 +8,12 @@
 
 #import <Foundation/Foundation.h>
 
-@interface FSGEDCOM
+struct byte_sequence; // forward declaration
+
+@interface FSGEDCOM : NSObject
+
+@property (readwrite, assign) struct byte_sequence* newline_sequences;
+
++ (id)GEDCOMWithData:(NSData*)data;
 
 @end
