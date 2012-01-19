@@ -8,7 +8,7 @@
 
 #include "FSByteScanner.h"
 
-NSRange scan_until_one_of(struct byte_buffer* scanner, struct byte_sequence* sequences, size_t num_sequences)
+NSRange scan_until_one_of(struct byte_buffer* scanner, struct byte_sequence* sequences[], size_t num_sequences)
 {
     NSRange ret = NSMakeRange(scanner->cursor, 0);
     enum { scan_not_found=-1 };
@@ -22,9 +22,9 @@ NSRange scan_until_one_of(struct byte_buffer* scanner, struct byte_sequence* seq
              i < num_sequences;
              ++i) {
             
-            if (((ushort*)scanner->bytes)[ ret.length + scanner->cursor ] == ((ushort*)(sequences[i].bytes))[scan_status[i]+1]) {
+            if (((ushort*)scanner->bytes)[ret.length+scanner->cursor] == ((ushort*)(sequences[i]->bytes))[scan_status[i]+1]) {
                 // match found
-                if (++scan_status[i] == sequences[i].length) {
+                if (++scan_status[i] == sequences[i]->length) {
                     // found the whole thing!1!
                     scanner->cursor += ret.length+1;
                     free(scan_status);

@@ -12,7 +12,7 @@
  * Holds a position in a buffer of bytes (ideally inside of an NSData object). Does NOT own the buffer. It is designed to be used to hold a range of information, plus where in the range it is.
  */
 struct byte_buffer {
-    void* bytes;
+    const void* bytes;
     size_t length;
     size_t cursor;
 };
@@ -21,7 +21,7 @@ struct byte_buffer {
  * Used for searching.
  */
 struct byte_sequence {
-    void* bytes;
+    const void* bytes;
     size_t length;
 };
 
@@ -32,4 +32,4 @@ struct byte_sequence {
  * @param struct byte_sequence* An array of byte sequences.
  * @param size_t The number of byte sequences.
  */
-NSRange scan_until_one_of(struct byte_buffer*, struct byte_sequence*, size_t);
+NSRange scan_until_one_of(struct byte_buffer*, struct byte_sequence**, size_t);

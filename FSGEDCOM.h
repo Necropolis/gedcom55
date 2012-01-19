@@ -12,7 +12,8 @@ struct byte_sequence; // forward declaration
 
 @interface FSGEDCOM : NSObject
 
-@property (readwrite, assign) struct byte_sequence* newline_sequences;
+@property (readwrite, assign) struct byte_sequence** newline_sequences;
+@property (readwrite, assign) size_t t_newline_sequences;
 
 - (NSDictionary*)parse:(NSData*)data;
 
