@@ -27,6 +27,7 @@ NSRange scan_until_one_of(struct byte_buffer* scanner, struct byte_sequence* seq
                 if (++scan_status[i] == sequences[i].length) {
                     // found the whole thing!1!
                     scanner->cursor += ret.length+1;
+                    free(scan_status);
                     return ret;
                 }
             } else {
@@ -40,6 +41,7 @@ NSRange scan_until_one_of(struct byte_buffer* scanner, struct byte_sequence* seq
     }
     
     scanner->cursor += ret.length+1;
+    free(scan_status);
     
     return ret;
 }

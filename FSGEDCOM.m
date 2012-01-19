@@ -14,7 +14,7 @@
 
 @synthesize newline_sequences=_newline_sequences;
 
-+ (id)GEDCOMWithData:(NSData *)data
+- (NSDictionary*)parse:(NSData*)data
 {
     // TODO: Scan through the GEDCOM, line by line!
     // Use FSByteScanner to do this!
@@ -31,8 +31,10 @@
     // level. Particularly, I'm not confident that Foundation will be able to reconstruct split
     // graphemes with reasonable success.
     
-    return nil;
+    return [NSDictionary dictionary];
 }
+
+#pragma mark NSObject
 
 - (id)init {
     self = [super init];

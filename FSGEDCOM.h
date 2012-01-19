@@ -14,6 +14,6 @@ struct byte_sequence; // forward declaration
 
 @property (readwrite, assign) struct byte_sequence* newline_sequences;
 
-+ (id)GEDCOMWithData:(NSData*)data;
+- (NSDictionary*)parse:(NSData*)data;
 
 @end
