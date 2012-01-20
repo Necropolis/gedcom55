@@ -75,8 +75,17 @@ NSString* FSNSStringFromByteBuffer(struct byte_buffer* buff)
     [str appendString:@"}"];
     return str;
 }
-NSString* FSNSStringFromByteSequence(struct byte_sequence* seq);
-NSString* FSNSStringFromCharRange(struct char_range ran);
+
+NSString* FSNSStringFromByteSequence(struct byte_sequence* seq)
+{
+    return [NSString stringWithFormat:@"{ length: %lu, bytes: %@ }", seq->length, FSNSStringFromBytes(seq->bytes, seq->length)];
+}
+
+NSString* FSNSStringFromCharRange(struct char_range ran)
+{
+    return [NSString stringWithFormat:@"{ begin: %c end: %c }", ran.begin, ran.end];
+}
+
 NSString* FSNSStringFromBytes(const void* bytes, size_t len)
 {
     NSMutableString* str = [NSMutableString stringWithCapacity:3*len];
