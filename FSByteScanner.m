@@ -67,3 +67,22 @@ NSRange FSByteBufferScanUntilOneOfCharRanges(struct byte_buffer* scanner, struct
     
     return ret;
 }
+
+NSString* FSNSStringFromByteBuffer(struct byte_buffer* buff)
+{
+    NSMutableString* str = [NSMutableString stringWithFormat:@"{ length: %lu, cursor: %lu, bytes: ", buff->length, buff->cursor];
+    [str appendString:FSNSStringFromBytes(buff->bytes+buff->cursor, MIN(16, buff->length))];
+    [str appendString:@"}"];
+    return str;
+}
+NSString* FSNSStringFromByteSequence(struct byte_sequence* seq);
+NSString* FSNSStringFromCharRange(struct char_range ran);
+NSString* FSNSStringFromBytes(const void* bytes, size_t len)
+{
+    NSMutableString* str = [NSMutableString stringWithCapacity:3*len];
+    for (size_t i=0;
+         i < len;
+         ++i)
+        [str appendFormat:@"%02hhx ", ((uint8*)bytes)[i]];
+    return str;
+}

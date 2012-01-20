@@ -10,6 +10,8 @@
 
 /**
  * Holds a position in a buffer of bytes (ideally inside of an NSData object). Does NOT own the buffer. It is designed to be used to hold a range of information, plus where in the range it is.
+ *
+ * Generally passed as references instead of on the stack (which copies) because then any changes do not propogate to the other structures.
  */
 struct byte_buffer {
     const void* bytes;
@@ -49,3 +51,8 @@ NSRange FSByteBufferScanUntilOneOfSequence(struct byte_buffer*, struct byte_sequ
  * @param size_t The number of character ranges.
  */
 NSRange FSByteBufferScanUntilOneOfCharRanges(struct byte_buffer*, struct char_range[], size_t);
+
+NSString* FSNSStringFromByteBuffer(struct byte_buffer* buff);
+NSString* FSNSStringFromByteSequence(struct byte_sequence* seq);
+NSString* FSNSStringFromCharRange(struct char_range ran);
+NSString* FSNSStringFromBytes(const void* bytes, size_t len);

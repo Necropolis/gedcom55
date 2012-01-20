@@ -10,6 +10,11 @@
 
 struct byte_sequence; // forward declaration
 
+extern const struct FSGEDCOMErrorCode {
+    __unsafe_unretained NSString* UnsupportedEncoding;
+    __unsafe_unretained NSString* UnknownEncoding;
+} FSGEDCOMErrorCode;
+
 @interface FSGEDCOM : NSObject
 
 @property (readwrite, assign) struct byte_sequence* newline_sequences;
