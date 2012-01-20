@@ -8,12 +8,12 @@
 
 #include "FSByteScanner.h"
 
-NSRange scan_until_one_of(struct byte_buffer* scanner, struct byte_sequence* sequences[], size_t num_sequences)
+NSRange scan_until_one_of(struct byte_buffer* scanner, struct byte_sequence sequences[], size_t num_sequences)
 {
     NSRange ret = NSMakeRange(scanner->cursor, 0);
-    enum { scan_not_found=-1 };
+    ssize_t scan_not_found=-1;
     ssize_t* scan_status = (ssize_t*)malloc(sizeof(ssize_t)*num_sequences);
-    memset((void*)scan_status, scan_not_found, sizeof(ushort)*num_sequences);
+    for (size_t i=0; i<num_sequences; ++i) scan_status[i]=scan_not_found;
     size_t i;
     
     while (ret.length + scanner->cursor < scanner->length) {
@@ -21,10 +21,11 @@ NSRange scan_until_one_of(struct byte_buffer* scanner, struct byte_sequence* seq
         for (i=0;
              i < num_sequences;
              ++i) {
-            
-            if (((ushort*)scanner->bytes)[ret.length+scanner->cursor] == ((ushort*)(sequences[i]->bytes))[scan_status[i]+1]) {
+            struct byte_sequence seq = sequences[i];
+            if (memcmp(&scanner->bytes[ret.length+scanner->cursor], seq.bytes, seq.length)) {
+//            if (((ushort*)scanner->bytes)[ret.length+scanner->cursor] == ((ushort*)(seq.bytes))[scan_status[i]+1]) {
                 // match found
-                if (++scan_status[i] == sequences[i]->length) {
+                if (++scan_status[i] == seq.length) {
                     // found the whole thing!1!
                     scanner->cursor += ret.length+1;
                     free(scan_status);

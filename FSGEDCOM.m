@@ -37,9 +37,9 @@
     buff.cursor = 0;
     buff.length = [data length];
     
-    NSRange firstLine= scan_until_one_of(&buff, &_newline_sequences, _t_newline_sequences);
+    NSRange firstLine= scan_until_one_of(&buff, _newline_sequences, _t_newline_sequences);
     
-    NSString* str = [NSString stringWithCharacters:((const unichar**)buff.bytes)[firstLine.location] length:firstLine.length];
+    NSString* str = [NSString stringWithCharacters:&buff.bytes[firstLine.location] length:firstLine.length];
     NSLog(@"First line: %@", str);
     
     return [NSDictionary dictionary];
@@ -51,13 +51,11 @@
     self = [super init];
     if (!self) return nil;
     
-    _newline_sequences = malloc(sizeof(struct byte_sequence*)*2);
-    _newline_sequences[0] = (struct byte_sequence*)malloc(sizeof(struct byte_sequence));
-    _newline_sequences[0]->bytes = "\n";
-    _newline_sequences[0]->length = 1;
-    _newline_sequences[1] = (struct byte_sequence*)malloc(sizeof(struct byte_sequence));
-    _newline_sequences[1]->bytes = "\r";
-    _newline_sequences[1]->length = 1;
+    _newline_sequences = malloc(sizeof(struct byte_sequence)*2);
+    _newline_sequences[0].bytes = "\n";
+    _newline_sequences[0].length = 1;
+    _newline_sequences[1].bytes = "\r";
+    _newline_sequences[1].length = 1;
     _t_newline_sequences = 2;
     
     return self;
@@ -65,7 +63,6 @@
 
 - (void)dealloc
 {
-    for (size_t i=0; i < _t_newline_sequences; ++i) free(_newline_sequences[i]);
     free(_newline_sequences);
 }
 
