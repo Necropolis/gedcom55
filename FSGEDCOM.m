@@ -34,11 +34,19 @@
     
     struct byte_buffer* buff = FSMakeByteBuffer([data bytes], [data length], 0);
     
-    NSRange firstLine= FSByteBufferScanUntilOneOfSequence(buff, _newline_sequences, _t_newline_sequences);
+    struct char_range* numeric = malloc(sizeof(struct char_range));
+    numeric[0].begin='0';
+    numeric[0].end  ='9';
     
-    NSString* str = [NSString stringWithCharacters:&buff->bytes[firstLine.location] length:firstLine.length];
+    NSRange beginOfFirstLine = FSByteBufferScanUntilOneOfCharRanges(buff, numeric, 1);
+    
+    NSLog(@"begin of first line: %@", NSStringFromRange(beginOfFirstLine));
+    NSRange firstLine= FSByteBufferScanUntilOneOfSequence(buff, _newline_sequences, _t_newline_sequences);
+    NSLog(@"first line: %@", NSStringFromRange(firstLine)); 
+    NSString* str = [[NSString alloc] initWithBytes:&(buff->bytes[firstLine.location]) length:firstLine.length encoding:NSUTF8StringEncoding];
     NSLog(@"First line: %@", str);
     
+    free(numeric);
     free(buff);
     
     return [NSDictionary dictionary];

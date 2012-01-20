@@ -25,13 +25,27 @@ struct byte_sequence {
     size_t length;
 };
 
+struct char_range {
+    unsigned char begin;
+    unsigned char end;
+};
+
 struct byte_buffer* FSMakeByteBuffer(const void* bytes, size_t length, size_t cursor);
 
 /**
- * Scans from byte_buffer's cursor until one of the byte sequences is encountered. Returns the range of the bytes in the byte_buffer, and advances cursor ahead to the end of the scanned bytes.
+ * Scans from byte_buffer's cursor until one of the byte sequences is encountered. Returns the range of the bytes between byte_buffer's cursor and the found pattern, and advances cursor ahead to the end of the scanned bytes.
  *
  * @param struct byte_buffer* The buffer to scan through.
- * @param struct byte_sequence* An array of byte sequences.
+ * @param struct byte_sequence[] An array of byte sequences.
  * @param size_t The number of byte sequences.
  */
 NSRange FSByteBufferScanUntilOneOfSequence(struct byte_buffer*, struct byte_sequence[], size_t);
+
+/**
+ * Scans from byte_buffer's cursor until a character in a given range is encountered. Returns the range of the bytes between byte_buffer's cursor and the found character, and advances the cursor ahead to the end of the scanned bytes.
+ *
+ * @param struct byte_buffer* The buffer to scan through.
+ * @param struct char_range[] An array of character ranges.
+ * @param size_t The number of character ranges.
+ */
+NSRange FSByteBufferScanUntilOneOfCharRanges(struct byte_buffer*, struct char_range[], size_t);

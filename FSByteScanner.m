@@ -27,8 +27,34 @@ NSRange FSByteBufferScanUntilOneOfSequence(struct byte_buffer* scanner, struct b
         for (i=0;
              i < num_sequences;
              ++i) { // memcmp can be assumed to be quite performant
-            if (memcmp(&scanner->bytes[ret.length+scanner->cursor], sequences[i].bytes, sequences[i].length)) {
+            if (0==memcmp(&scanner->bytes[ret.length+scanner->cursor], sequences[i].bytes, sequences[i].length)) {
                 scanner->cursor += ret.length+1;
+                return ret;
+            }
+        }
+        
+        ++ret.length;
+        
+    }
+    
+    scanner->cursor += ret.length+1;
+    
+    return ret;
+}
+
+NSRange FSByteBufferScanUntilOneOfCharRanges(struct byte_buffer* scanner, struct char_range ranges[], size_t num_ranges)
+{
+    NSRange ret = NSMakeRange(scanner->cursor, 0);
+    size_t i;
+    
+    while (ret.length + scanner->cursor < scanner->length) {
+        
+        for (i=0;
+             i < num_ranges;
+             ++i) {
+            if (((unsigned char*)scanner   ->bytes)[ret.length + scanner->cursor] >= ranges[i].begin
+                && ((unsigned char*)scanner->bytes)[ret.length + scanner->cursor] <= ranges[i].end) {
+                scanner->cursor += ret.length;
                 return ret;
             }
         }
