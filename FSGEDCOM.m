@@ -20,17 +20,15 @@
     // TODO: Scan through the GEDCOM, line by line!
     // Use FSByteScanner to do this!
     
-    // GEDCOM 5.5 does not define an encoding type! It may be of mixed encoding!
+    // GEDCOM 5.5 defines an encoding type of Unicode (probably UTF-8), but older files may use ANSEL
     
     // Current battle plan:
     // Scan through, byte by byte! The plumbing that defines the structure is all ASCII, so that'll
-    // live on 8-bit boundaries. The user-input data may not, however. It may include any number of
-    // diverse encodings, so those will be reconstructed and passed on to NSString after using Carbon's
-    // Text Encoding Conversion Manager http://developer.apple.com/library/mac/#documentation/Carbon/Reference/Text_Encodin_sion_Manager/Reference/reference.html
-    // to run through and determine a likely encoding.
+    // live on 8-bit boundaries. The user-input data may not, however.
     // There are multi-line strings in GEDCOM 5.5, so these will need to be reconstructed at the byte-
     // level. Particularly, I'm not confident that Foundation will be able to reconstruct split
-    // graphemes with reasonable success.
+    // graphemes with reasonable success, so that level of data-smashing will probably be done in C
+    // and then the combined void* region will be passed through to NSString.
     
     struct byte_buffer* buff = FSMakeByteBuffer([data bytes], [data length], 0);
     
