@@ -66,3 +66,4 @@ NSString* FSNSStringFromByteBuffer(struct byte_buffer*); /// obtain pretty text
 NSString* FSNSStringFromByteSequence(struct byte_sequence*); /// obtain pretty text
 NSString* FSNSStringFromCharRange(struct char_range); /// obtain pretty text
 NSString* FSNSStringFromBytes(const void*, size_t); /// obtain a string of hex
+NSString* FSNSStringFromBytesAsASCII(const void*, size_t); // obtain a string of stuff

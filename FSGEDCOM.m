@@ -8,12 +8,16 @@
 
 #import "FSGEDCOM.h"
 
+#include <objc/runtime.h>
+
 #import "FSGEDCOMStructure.h"
 #import "FSByteScanner.h"
 
 @interface FSGEDCOM (__parser_common__)
 
-- (FSGEDCOMStructure*)parseStructure:(struct byte_buffer*)buff;
++ (NSArray*)allStructureClasses;
+
+- (id<FSGEDCOMStructure>)parseStructure:(struct byte_buffer*)buff;
 
 @end
 
@@ -57,7 +61,10 @@
     if (is_utf8) buff->cursor += 3;
     else if (is_unicode1||is_unicode2) buff->cursor += 2;
     
-    
+    NSMutableArray* arr = [NSMutableArray array];
+    for (Class c in [[self class] allStructureClasses])
+        [arr addObject:NSStringFromClass(c)];
+    NSLog(@"All structure classes: %@", arr);
     
     NSLog(@"Byte Buffer: %@", FSNSStringFromByteBuffer(buff));
     
@@ -72,7 +79,27 @@
 
 #pragma mark Parser Common
 
-- (FSGEDCOMStructure*)parseStructure:(struct byte_buffer*)buff
++ (NSArray*)allStructureClasses
+{
+    static NSArray* allStructureClasses=nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        NSMutableArray* arr = [NSMutableArray array];
+        int numClasses = objc_getClassList(NULL, 0);
+        Class* allClasses=(Class*)malloc(sizeof(Class*)*numClasses);
+        objc_getClassList(allClasses, numClasses);
+        for (size_t i=0;
+             i<numClasses;
+             ++i) {
+            if (class_conformsToProtocol(allClasses[i], @protocol(FSGEDCOMStructure)))
+                [arr addObject:allClasses[i]];
+        }
+        allStructureClasses = [arr copy];
+    });
+    return allStructureClasses;
+}
+
+- (id<FSGEDCOMStructure>)parseStructure:(struct byte_buffer*)buff
 {
     // Decide what kind of structure this is and hand off to the next parser accordingly.
     

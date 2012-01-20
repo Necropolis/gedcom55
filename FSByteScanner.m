@@ -70,15 +70,20 @@ NSRange FSByteBufferScanUntilOneOfCharRanges(struct byte_buffer* scanner, struct
 
 NSString* FSNSStringFromByteBuffer(struct byte_buffer* buff)
 {
-    NSMutableString* str = [NSMutableString stringWithFormat:@"{ length: %lu, cursor: %lu, bytes: ", buff->length, buff->cursor];
-    [str appendString:FSNSStringFromBytes(buff->bytes+buff->cursor, MIN(16, buff->length))];
-    [str appendString:@"}"];
-    return str;
+    size_t peek_len = 16;
+    return [NSString stringWithFormat:@"{\n    length: %lu,\n    cursor: %lu,\n    bytes: %@,\n    ASCII: %@\n}",
+            buff->length,
+            buff->cursor,
+            FSNSStringFromBytes(buff->bytes+buff->cursor, MIN(peek_len, buff->length-buff->cursor)),
+            FSNSStringFromBytesAsASCII(buff->bytes+buff->cursor, MIN(peek_len, buff->length-buff->cursor))];
 }
 
 NSString* FSNSStringFromByteSequence(struct byte_sequence* seq)
 {
-    return [NSString stringWithFormat:@"{ length: %lu, bytes: %@ }", seq->length, FSNSStringFromBytes(seq->bytes, seq->length)];
+    return [NSString stringWithFormat:@"{\n    length: %lu,\n    bytes: %@\n    ASCII: %@\n}",
+            seq->length,
+            FSNSStringFromBytes(seq->bytes, seq->length),
+            FSNSStringFromBytesAsASCII(seq->bytes, seq->length)];
 }
 
 NSString* FSNSStringFromCharRange(struct char_range ran)
@@ -93,5 +98,28 @@ NSString* FSNSStringFromBytes(const void* bytes, size_t len)
          i < len;
          ++i)
         [str appendFormat:@"%02hhx ", ((uint8*)bytes)[i]];
+    [str deleteCharactersInRange:NSMakeRange([str length]-1, 1)];
+    return str;
+}
+
+NSString* FSNSStringFromBytesAsASCII(const void* bytes, size_t len)
+{
+    NSMutableString* str = [NSMutableString stringWithCapacity:3*len]; // guesstimate
+    for (size_t i=0;
+         i < len;
+         ++i) {
+        uint8 c = ((uint8*)bytes)[i];
+        if (isgraph(c))      [str appendFormat:@" %c ",    c];
+        else if (isspace(c)) {
+            if (c=='\r')     [str appendString:@"\\r "      ];
+            else if (c=='\n')[str appendString:@"\\n "      ];
+            else if (c=='\v')[str appendString:@"\\v "      ];
+            else if (c=='\f')[str appendString:@"\\f "      ];
+            else if (c=='\t')[str appendString:@"\\t "      ];
+            else             [str appendFormat:@"%02hhx ", c];
+        }
+        else                 [str appendFormat:@"%02hhx ", c];
+    }
+    [str deleteCharactersInRange:NSMakeRange([str length]-1, 1)];
     return str;
 }
