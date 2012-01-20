@@ -61,16 +61,7 @@
     if (is_utf8) buff->cursor += 3;
     else if (is_unicode1||is_unicode2) buff->cursor += 2;
     
-    NSMutableArray* arr = [NSMutableArray array];
-    for (Class c in [[self class] allStructureClasses])
-        [arr addObject:NSStringFromClass(c)];
-    NSLog(@"All structure classes: %@", arr);
-    
     NSLog(@"Byte Buffer: %@", FSNSStringFromByteBuffer(buff));
-    
-    NSRange firstLine= FSByteBufferScanUntilOneOfSequence(buff, _newline_sequences, _t_newline_sequences);
-    NSString* str = [[NSString alloc] initWithBytes:&(buff->bytes[firstLine.location]) length:firstLine.length encoding:NSUTF8StringEncoding];
-    NSLog(@"First line: %@ %@", NSStringFromRange(firstLine), str);
     
     free(buff);
     

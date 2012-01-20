@@ -116,6 +116,7 @@ NSString* FSNSStringFromBytesAsASCII(const void* bytes, size_t len)
             else if (c=='\v')[str appendString:@"\\v "      ];
             else if (c=='\f')[str appendString:@"\\f "      ];
             else if (c=='\t')[str appendString:@"\\t "      ];
+            else if (c==' ' )[str appendString:@"sp "       ]; 
             else             [str appendFormat:@"%02hhx ", c];
         }
         else                 [str appendFormat:@"%02hhx ", c];
