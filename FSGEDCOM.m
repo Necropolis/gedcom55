@@ -32,15 +32,14 @@
     // level. Particularly, I'm not confident that Foundation will be able to reconstruct split
     // graphemes with reasonable success.
     
-    struct byte_buffer buff;
-    buff.bytes = [data bytes];
-    buff.cursor = 0;
-    buff.length = [data length];
+    struct byte_buffer* buff = FSMakeByteBuffer([data bytes], [data length], 0);
     
-    NSRange firstLine= scan_until_one_of(&buff, _newline_sequences, _t_newline_sequences);
+    NSRange firstLine= FSByteBufferScanUntilOneOfSequence(buff, _newline_sequences, _t_newline_sequences);
     
-    NSString* str = [NSString stringWithCharacters:&buff.bytes[firstLine.location] length:firstLine.length];
+    NSString* str = [NSString stringWithCharacters:&buff->bytes[firstLine.location] length:firstLine.length];
     NSLog(@"First line: %@", str);
+    
+    free(buff);
     
     return [NSDictionary dictionary];
 }

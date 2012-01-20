@@ -8,33 +8,29 @@
 
 #include "FSByteScanner.h"
 
-NSRange scan_until_one_of(struct byte_buffer* scanner, struct byte_sequence sequences[], size_t num_sequences)
+struct byte_buffer* FSMakeByteBuffer(const void* bytes, size_t length, size_t cursor)
+{
+    struct byte_buffer* buff = malloc(sizeof(struct byte_buffer));
+    buff->bytes = bytes;
+    buff->length = length;
+    buff->cursor = cursor;
+    return buff;
+}
+
+NSRange FSByteBufferScanUntilOneOfSequence(struct byte_buffer* scanner, struct byte_sequence sequences[], size_t num_sequences)
 {
     NSRange ret = NSMakeRange(scanner->cursor, 0);
-    ssize_t scan_not_found=-1;
-    ssize_t* scan_status = (ssize_t*)malloc(sizeof(ssize_t)*num_sequences);
-    for (size_t i=0; i<num_sequences; ++i) scan_status[i]=scan_not_found;
     size_t i;
     
     while (ret.length + scanner->cursor < scanner->length) {
         
         for (i=0;
              i < num_sequences;
-             ++i) {
-            struct byte_sequence seq = sequences[i];
-            if (memcmp(&scanner->bytes[ret.length+scanner->cursor], seq.bytes, seq.length)) {
-//            if (((ushort*)scanner->bytes)[ret.length+scanner->cursor] == ((ushort*)(seq.bytes))[scan_status[i]+1]) {
-                // match found
-                if (++scan_status[i] == seq.length) {
-                    // found the whole thing!1!
-                    scanner->cursor += ret.length+1;
-                    free(scan_status);
-                    return ret;
-                }
-            } else {
-                scan_status[i] = scan_not_found;
+             ++i) { // memcmp can be assumed to be quite performant
+            if (memcmp(&scanner->bytes[ret.length+scanner->cursor], sequences[i].bytes, sequences[i].length)) {
+                scanner->cursor += ret.length+1;
+                return ret;
             }
-            
         }
         
         ++ret.length;
@@ -42,7 +38,6 @@ NSRange scan_until_one_of(struct byte_buffer* scanner, struct byte_sequence sequ
     }
     
     scanner->cursor += ret.length+1;
-    free(scan_status);
     
     return ret;
 }
