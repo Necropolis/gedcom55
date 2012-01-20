@@ -8,7 +8,14 @@
 
 #import "FSGEDCOM.h"
 
+#import "FSGEDCOMStructure.h"
 #import "FSByteScanner.h"
+
+@interface FSGEDCOM (__parser_common__)
+
+- (FSGEDCOMStructure*)parseStructure:(struct byte_buffer*)buff;
+
+@end
 
 @implementation FSGEDCOM
 
@@ -35,9 +42,9 @@
     struct byte_buffer* buff = FSMakeByteBuffer([data bytes], [data length], 0);
         
     uint8 ansel_or_ascii[] = { 0x30, 0x20       }; BOOL is_ansel_or_ascii = 0==memcmp(buff->bytes, ansel_or_ascii, 2);
-    uint8 utf8[]           = { 0xEF, 0xBB, 0xBF }; BOOL is_utf8 =           0==memcmp(buff->bytes, utf8,           3);
-    uint8 unicode1[]       = { 0x30, 0x00       }; BOOL is_unicode1 =       0==memcmp(buff->bytes, unicode1,       2);
-    uint8 unicode2[]       = { 0x00, 0x30       }; BOOL is_unicode2 =       0==memcmp(buff->bytes, unicode2,       2);
+    uint8 utf8[]           = { 0xEF, 0xBB, 0xBF }; BOOL is_utf8           = 0==memcmp(buff->bytes, utf8,           3);
+    uint8 unicode1[]       = { 0x30, 0x00       }; BOOL is_unicode1       = 0==memcmp(buff->bytes, unicode1,       2);
+    uint8 unicode2[]       = { 0x00, 0x30       }; BOOL is_unicode2       = 0==memcmp(buff->bytes, unicode2,       2);
     
     if (is_ansel_or_ascii) {
         [warn_and_err setObject:@"I don't support ANSEL or ASCII encoding. Sorry." forKey:FSGEDCOMErrorCode.UnsupportedEncoding];
@@ -50,6 +57,8 @@
     if (is_utf8) buff->cursor += 3;
     else if (is_unicode1||is_unicode2) buff->cursor += 2;
     
+    
+    
     NSLog(@"Byte Buffer: %@", FSNSStringFromByteBuffer(buff));
     
     NSRange firstLine= FSByteBufferScanUntilOneOfSequence(buff, _newline_sequences, _t_newline_sequences);
@@ -59,6 +68,15 @@
     free(buff);
     
     return warn_and_err;
+}
+
+#pragma mark Parser Common
+
+- (FSGEDCOMStructure*)parseStructure:(struct byte_buffer*)buff
+{
+    // Decide what kind of structure this is and hand off to the next parser accordingly.
+    
+    return nil;
 }
 
 #pragma mark NSObject
