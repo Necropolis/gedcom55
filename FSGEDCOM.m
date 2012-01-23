@@ -95,13 +95,20 @@
     // Decide what kind of structure this is and hand off to the next parser accordingly.
     
     // detect next line ending
+    size_t cur = buff->cursor;
+    NSRange lineRange=
+    FSByteBufferScanUntilOneOfSequence(buff, FSByteSequencesNewlinesLong().sequences, FSByteSequencesNewlinesLong().length);
     // create a new dummy byte_buffer that thinks it ends at the line ending
+    struct byte_buffer* dbuff = FSMakeByteBuffer(buff->bytes, lineRange.length+lineRange.location, cur);
+    NSLog(@"Byte Buffer: %@", FSNSStringFromByteBuffer(dbuff));
     for (Class c in [[self class] allStructureClasses]) {
         // scan for the respondsTo byte_sequence in the dummy byte_buffer
         // if it respondsTo, then pass it on for scanning; break
     }
     
     // if the cursor for buff is beyond the cursor for the dummy buffer, then nothing responded to this structure; output some information and throw an error
+    
+    free(dbuff); // not used anymore
     
     return nil;
 }
