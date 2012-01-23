@@ -23,9 +23,6 @@
 
 @implementation FSGEDCOM
 
-@synthesize newline_sequences=_newline_sequences;
-@synthesize t_newline_sequences=_t_newline_sequences;
-
 - (NSDictionary*)parse:(NSData*)data
 {
     // TODO: Scan through the GEDCOM, line by line!
@@ -63,6 +60,8 @@
     
     NSLog(@"Byte Buffer: %@", FSNSStringFromByteBuffer(buff));
     
+    [self parseStructure:buff];
+    
     free(buff);
     
     return warn_and_err;
@@ -94,6 +93,7 @@
 - (id<FSGEDCOMStructure>)parseStructure:(struct byte_buffer*)buff
 {
     // Decide what kind of structure this is and hand off to the next parser accordingly.
+    
     // detect next line ending
     // create a new dummy byte_buffer that thinks it ends at the line ending
     for (Class c in [[self class] allStructureClasses]) {
@@ -112,19 +112,7 @@
     self = [super init];
     if (!self) return nil;
     
-    _newline_sequences = malloc(sizeof(struct byte_sequence)*2);
-    _newline_sequences[0].bytes = "\n";
-    _newline_sequences[0].length = 1;
-    _newline_sequences[1].bytes = "\r";
-    _newline_sequences[1].length = 1;
-    _t_newline_sequences = 2;
-    
     return self;
-}
-
-- (void)dealloc
-{
-    free(_newline_sequences);
 }
 
 @end

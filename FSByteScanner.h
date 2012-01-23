@@ -27,6 +27,11 @@ struct byte_sequence {
     size_t length;
 };
 
+struct byte_sequence_array {
+    struct byte_sequence* sequences;
+    size_t length;
+};
+
 /**
  * Think of this like the regex /[a-z]/ or /[A-Z]/ construct. Make arrays of this to get fancy bits like /[a-zA-Z]/.
  */
@@ -61,6 +66,9 @@ NSRange FSByteBufferScanUntilOneOfSequence(struct byte_buffer*, struct byte_sequ
  * @param size_t The number of character ranges.
  */
 NSRange FSByteBufferScanUntilOneOfCharRanges(struct byte_buffer*, struct char_range[], size_t);
+
+struct byte_sequence_array FSByteSequencesNewlinesShort(void);
+struct byte_sequence_array FSByteSequencesNewlinesLong(void);
 
 NSString* FSNSStringFromByteBuffer(struct byte_buffer*); /// obtain pretty text
 NSString* FSNSStringFromByteSequence(struct byte_sequence*); /// obtain pretty text

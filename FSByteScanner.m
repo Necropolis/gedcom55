@@ -68,6 +68,34 @@ NSRange FSByteBufferScanUntilOneOfCharRanges(struct byte_buffer* scanner, struct
     return ret;
 }
 
+struct byte_sequence_array FSByteSequencesNewlinesShort()
+{
+    static struct byte_sequence_array b;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        b.sequences = malloc(sizeof(struct byte_sequence) * 2);
+        b.sequences[0].bytes = "\r"  ; b.sequences[0].length= 1;
+        b.sequences[1].bytes = "\n"  ; b.sequences[1].length= 1;
+        b.length = 2;
+    });
+    return b;
+}
+
+struct byte_sequence_array FSByteSequencesNewlinesLong()
+{
+    static struct byte_sequence_array b;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        b.sequences = malloc(sizeof(struct byte_sequence) * 4);
+        b.sequences[0].bytes = "\r\n"; b.sequences[0].length = 2;
+        b.sequences[1].bytes = "\n\r"; b.sequences[1].length = 2;
+        b.sequences[2].bytes = "\r"  ; b.sequences[2].length = 1;
+        b.sequences[3].bytes = "\n"  ; b.sequences[3].length = 1;
+        b.length = 4;
+    });
+    return b;
+}
+
 NSString* FSNSStringFromByteBuffer(struct byte_buffer* buff)
 {
     size_t peek_len = 16;

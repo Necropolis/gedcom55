@@ -15,7 +15,7 @@
 + (struct byte_sequence)respondsTo
 {
     struct byte_sequence seq = {
-        .bytes = "HEAD",
+        .bytes = "0 HEAD",
         .length = 4
     }; // don't worry, it's stuck in code as a .data block!
     return seq;
