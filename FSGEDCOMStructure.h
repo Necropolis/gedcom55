@@ -13,6 +13,8 @@ struct byte_sequence; // fwd ref
 
 @interface FSGEDCOMStructure : NSObject
 
++ (NSMutableArray*)registeredSubclasses;
+
 + (struct byte_sequence)respondsTo;
 - (struct byte_sequence)respondsTo;
 

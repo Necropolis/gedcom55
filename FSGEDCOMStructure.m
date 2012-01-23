@@ -12,6 +12,26 @@
 
 @implementation FSGEDCOMStructure
 
++ (NSMutableArray*)registeredSubclasses
+{
+    static NSMutableArray* registeredSubclasses;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        registeredSubclasses = [[NSMutableArray alloc] init];
+    });
+    return registeredSubclasses;
+}
+
++ (void)load
+{
+    @autoreleasepool {
+        Class c0=[self class];
+        if (c0!=[FSGEDCOMStructure class]) { // only respond to subclasses
+            [[self registeredSubclasses] addObject:c0];
+        }
+    }
+}
+
 + (struct byte_sequence)respondsTo
 {
     [NSException raise:@"Pure Virtual Called" format:@"%s is supposed to be pure-virtual", __PRETTY_FUNCTION__];

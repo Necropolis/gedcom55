@@ -12,6 +12,8 @@
 
 @implementation FSGEDCOMHead
 
++ (void)load { [super load]; }
+
 + (struct byte_sequence)respondsTo
 {
     struct byte_sequence seq = {

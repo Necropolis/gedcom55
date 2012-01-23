@@ -67,32 +67,6 @@
 
 #pragma mark Parser Common
 
-+ (NSArray*)allStructureClasses
-{
-    static NSArray* allStructureClasses=nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        NSMutableArray* arr = [NSMutableArray array];
-        NSArray* forbiddenClasses = [NSArray arrayWithObjects:@"NSMessageBuilder", @"__NSGenericDeallocHandler", @"_NSZombie_", @"Object", @"__IncompleteProtocol", @"Protocol", nil];
-        int numClasses = objc_getClassList(NULL, 0);
-        Class* allClasses=(Class*)malloc(sizeof(Class*)*numClasses);
-        objc_getClassList(allClasses, numClasses);
-        Class fsgedstruct = [FSGEDCOMStructure class];
-        for (size_t i=0;
-             i<numClasses;
-             ++i) {
-            Class c0 = allClasses[i];
-            if ([forbiddenClasses containsObject:NSStringFromClass(c0)]) continue;
-//            NSString* s0= NSStringFromClass(c0); // uncomment me for debugging around this here area
-            if (c0 != fsgedstruct && [c0 isSubclassOfClass:fsgedstruct]) { [arr addObject:c0]; continue; }
-        }
-        allStructureClasses = [arr copy];
-        free(allClasses);
-    });
-//    NSLog(@"All structure classes: %@", allStructureClasses); // uncomment me for debugging around this here area
-    return allStructureClasses;
-}
-
 - (FSGEDCOMStructure*)parseStructure:(struct byte_buffer*)buff
 {
     // Decide what kind of structure this is and hand off to the next parser accordingly.
@@ -103,7 +77,8 @@
     FSByteBufferScanUntilOneOfSequence(buff, FSByteSequencesNewlinesLong().sequences, FSByteSequencesNewlinesLong().length);
     // create a new dummy byte_buffer that thinks it ends at the line ending
     struct byte_buffer* dbuff = FSMakeByteBuffer(buff->bytes, lineRange.length+lineRange.location, cur);
-    for (Class c in [[self class] allStructureClasses]) {
+    
+    for (Class c in [FSGEDCOMStructure registeredSubclasses]) {
         // scan for the respondsTo byte_sequence in the dummy byte_buffer
         if (NSNotFound!=FSByteBufferHasByteSequence(*dbuff, [c respondsTo])) {
             // parse using c
