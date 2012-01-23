@@ -104,25 +104,25 @@ struct byte_sequence_array FSByteSequencesNewlinesLong()
     return b;
 }
 
-NSString* FSNSStringFromByteBuffer(struct byte_buffer* buff)
+NSString* FSNSStringFromByteBuffer(const struct byte_buffer buff)
 {
     size_t peek_len = 16;
     return [NSString stringWithFormat:@"{\n    length: %lu,\n    cursor: %lu,\n    bytes: %@,\n    ASCII: %@\n}",
-            buff->length,
-            buff->cursor,
-            FSNSStringFromBytes(buff->bytes+buff->cursor, MIN(peek_len, buff->length-buff->cursor)),
-            FSNSStringFromBytesAsASCII(buff->bytes+buff->cursor, MIN(peek_len, buff->length-buff->cursor))];
+            buff.length,
+            buff.cursor,
+            FSNSStringFromBytes(buff.bytes+buff.cursor, MIN(peek_len, buff.length-buff.cursor)),
+            FSNSStringFromBytesAsASCII(buff.bytes+buff.cursor, MIN(peek_len, buff.length-buff.cursor))];
 }
 
-NSString* FSNSStringFromByteSequence(struct byte_sequence* seq)
+NSString* FSNSStringFromByteSequence(const struct byte_sequence seq)
 {
     return [NSString stringWithFormat:@"{\n    length: %lu,\n    bytes: %@\n    ASCII: %@\n}",
-            seq->length,
-            FSNSStringFromBytes(seq->bytes, seq->length),
-            FSNSStringFromBytesAsASCII(seq->bytes, seq->length)];
+            seq.length,
+            FSNSStringFromBytes(seq.bytes, seq.length),
+            FSNSStringFromBytesAsASCII(seq.bytes, seq.length)];
 }
 
-NSString* FSNSStringFromCharRange(struct char_range ran)
+NSString* FSNSStringFromCharRange(const struct char_range ran)
 {
     return [NSString stringWithFormat:@"{ begin: %c end: %c }", ran.begin, ran.end];
 }

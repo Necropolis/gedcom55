@@ -24,7 +24,7 @@
 - (NSDictionary*)parseStructure:(struct byte_buffer *)buff
 {
     // do something here...
-    NSLog(@"About to parse GEDCOM HEAD using %@", FSNSStringFromByteBuffer(buff));
+    NSLog(@"About to parse GEDCOM HEAD using %@", FSNSStringFromByteBuffer(*buff));
     return nil;
 }
 

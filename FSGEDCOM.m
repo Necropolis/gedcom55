@@ -58,8 +58,6 @@
     if (is_utf8) buff->cursor += 3;
     else if (is_unicode1||is_unicode2) buff->cursor += 2;
     
-    NSLog(@"Byte Buffer: %@", FSNSStringFromByteBuffer(buff));
-    
     [self parseStructure:buff];
     
     free(buff);
@@ -91,7 +89,7 @@
         allStructureClasses = [arr copy];
         free(allClasses);
     });
-    NSLog(@"All classes: %@", allStructureClasses);
+//    NSLog(@"All structure classes: %@", allStructureClasses); // uncomment me for debugging around this here area
     return allStructureClasses;
 }
 
@@ -105,11 +103,8 @@
     FSByteBufferScanUntilOneOfSequence(buff, FSByteSequencesNewlinesLong().sequences, FSByteSequencesNewlinesLong().length);
     // create a new dummy byte_buffer that thinks it ends at the line ending
     struct byte_buffer* dbuff = FSMakeByteBuffer(buff->bytes, lineRange.length+lineRange.location, cur);
-    NSLog(@"Dummy Byte Buffer: %@", FSNSStringFromByteBuffer(dbuff));
     for (Class c in [[self class] allStructureClasses]) {
         // scan for the respondsTo byte_sequence in the dummy byte_buffer
-        struct byte_sequence seq = [c respondsTo];
-        NSLog(@"Responds To: %@", FSNSStringFromByteSequence(&seq));
         if (NSNotFound!=FSByteBufferHasByteSequence(*dbuff, [c respondsTo])) {
             // parse using c
             FSGEDCOMStructure* s = [[c alloc] init];
