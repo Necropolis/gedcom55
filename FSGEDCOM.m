@@ -17,7 +17,7 @@
 
 + (NSArray*)allStructureClasses;
 
-- (id<FSGEDCOMStructure>)parseStructure:(struct byte_buffer*)buff;
+- (FSGEDCOMStructure*)parseStructure:(struct byte_buffer*)buff;
 
 @end
 
@@ -75,22 +75,27 @@
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         NSMutableArray* arr = [NSMutableArray array];
+        NSArray* forbiddenClasses = [NSArray arrayWithObjects:@"NSMessageBuilder", @"__NSGenericDeallocHandler", @"_NSZombie_", @"Object", @"__IncompleteProtocol", @"Protocol", nil];
         int numClasses = objc_getClassList(NULL, 0);
         Class* allClasses=(Class*)malloc(sizeof(Class*)*numClasses);
         objc_getClassList(allClasses, numClasses);
+        Class fsgedstruct = [FSGEDCOMStructure class];
         for (size_t i=0;
              i<numClasses;
              ++i) {
-            if (class_conformsToProtocol(allClasses[i], @protocol(FSGEDCOMStructure)))
-                [arr addObject:allClasses[i]];
+            Class c0 = allClasses[i];
+            if ([forbiddenClasses containsObject:NSStringFromClass(c0)]) continue;
+//            NSString* s0= NSStringFromClass(c0); // uncomment me for debugging around this here area
+            if (c0 != fsgedstruct && [c0 isSubclassOfClass:fsgedstruct]) { [arr addObject:c0]; continue; }
         }
         allStructureClasses = [arr copy];
         free(allClasses);
     });
+    NSLog(@"All classes: %@", allStructureClasses);
     return allStructureClasses;
 }
 
-- (id<FSGEDCOMStructure>)parseStructure:(struct byte_buffer*)buff
+- (FSGEDCOMStructure*)parseStructure:(struct byte_buffer*)buff
 {
     // Decide what kind of structure this is and hand off to the next parser accordingly.
     
@@ -100,10 +105,17 @@
     FSByteBufferScanUntilOneOfSequence(buff, FSByteSequencesNewlinesLong().sequences, FSByteSequencesNewlinesLong().length);
     // create a new dummy byte_buffer that thinks it ends at the line ending
     struct byte_buffer* dbuff = FSMakeByteBuffer(buff->bytes, lineRange.length+lineRange.location, cur);
-    NSLog(@"Byte Buffer: %@", FSNSStringFromByteBuffer(dbuff));
+    NSLog(@"Dummy Byte Buffer: %@", FSNSStringFromByteBuffer(dbuff));
     for (Class c in [[self class] allStructureClasses]) {
         // scan for the respondsTo byte_sequence in the dummy byte_buffer
-        // if it respondsTo, then pass it on for scanning; break
+        struct byte_sequence seq = [c respondsTo];
+        NSLog(@"Responds To: %@", FSNSStringFromByteSequence(&seq));
+        if (NSNotFound!=FSByteBufferHasByteSequence(*dbuff, [c respondsTo])) {
+            // parse using c
+            FSGEDCOMStructure* s = [[c alloc] init];
+            [s parseStructure:buff];
+            break;
+        }
     }
     
     // if the cursor for buff is beyond the cursor for the dummy buffer, then nothing responded to this structure; output some information and throw an error

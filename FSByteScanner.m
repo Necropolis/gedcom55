@@ -68,6 +68,14 @@ NSRange FSByteBufferScanUntilOneOfCharRanges(struct byte_buffer* scanner, struct
     return ret;
 }
 
+size_t FSByteBufferHasByteSequence(const struct byte_buffer buff, const struct byte_sequence seq)
+{
+    for (size_t i=buff.cursor;
+         i+seq.length<=buff.length;
+         ++i) if (0==memcmp(&buff.bytes[i], seq.bytes, seq.length)) return i;
+    return NSNotFound; // NSIntegerMax; not likely to be the real ret value
+}
+
 struct byte_sequence_array FSByteSequencesNewlinesShort()
 {
     static struct byte_sequence_array b;

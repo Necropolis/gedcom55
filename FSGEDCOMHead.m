@@ -16,7 +16,7 @@
 {
     struct byte_sequence seq = {
         .bytes = "0 HEAD",
-        .length = 4
+        .length = 6
     }; // don't worry, it's stuck in code as a .data block!
     return seq;
 }
@@ -24,6 +24,7 @@
 - (NSDictionary*)parseStructure:(struct byte_buffer *)buff
 {
     // do something here...
+    NSLog(@"About to parse GEDCOM HEAD using %@", FSNSStringFromByteBuffer(buff));
     return nil;
 }
 

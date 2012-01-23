@@ -67,8 +67,13 @@ NSRange FSByteBufferScanUntilOneOfSequence(struct byte_buffer*, struct byte_sequ
  */
 NSRange FSByteBufferScanUntilOneOfCharRanges(struct byte_buffer*, struct char_range[], size_t);
 
-struct byte_sequence_array FSByteSequencesNewlinesShort(void);
-struct byte_sequence_array FSByteSequencesNewlinesLong(void);
+/**
+ * Scans from byte_buffer's cursor until it finds the given byte_sequence, returning the location of the byte_sequence in the buffer. Returns NSNotFound if not found.
+ */
+size_t FSByteBufferHasByteSequence(const struct byte_buffer, const struct byte_sequence);
+
+struct byte_sequence_array FSByteSequencesNewlinesShort(void); // \r & \n
+struct byte_sequence_array FSByteSequencesNewlinesLong(void); // \r\n & \n\r & \r & \n
 
 NSString* FSNSStringFromByteBuffer(struct byte_buffer*); /// obtain pretty text
 NSString* FSNSStringFromByteSequence(struct byte_sequence*); /// obtain pretty text

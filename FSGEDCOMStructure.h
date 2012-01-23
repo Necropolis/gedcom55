@@ -11,9 +11,10 @@
 struct byte_buffer; // fwd ref
 struct byte_sequence; // fwd ref
 
-@protocol FSGEDCOMStructure <NSObject>
+@interface FSGEDCOMStructure : NSObject
 
 + (struct byte_sequence)respondsTo;
+- (struct byte_sequence)respondsTo;
 
 - (NSDictionary*)parseStructure:(struct byte_buffer*)buff;
 

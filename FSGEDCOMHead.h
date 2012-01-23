@@ -10,6 +10,6 @@
 
 #import "FSGEDCOMStructure.h"
 
-@interface FSGEDCOMHead : NSObject <FSGEDCOMStructure>
+@interface FSGEDCOMHead : FSGEDCOMStructure
 
 @end
