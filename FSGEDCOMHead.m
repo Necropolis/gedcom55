@@ -12,6 +12,8 @@
 
 @implementation FSGEDCOMHead
 
+@synthesize source=_source;
+
 + (void)load { [super load]; }
 
 + (struct byte_sequence)respondsTo
@@ -26,6 +28,8 @@
 - (NSDictionary*)parseStructure:(struct byte_buffer *)buff
 {
     // do something here...
+    struct byte_buffer* sub_buff = [self obtainSingleLine:buff];
+    NSLog(@"Sub-buffer: %@", FSNSStringFromByteBuffer(*sub_buff));
     NSLog(@"About to parse GEDCOM HEAD using %@", FSNSStringFromByteBuffer(*buff));
     return nil;
 }

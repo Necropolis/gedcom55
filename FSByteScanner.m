@@ -8,12 +8,21 @@
 
 #include "FSByteScanner.h"
 
-struct byte_buffer* FSMakeByteBuffer(const void* bytes, size_t length, size_t cursor)
+struct byte_buffer* FSMakeByteBuffer(const voidPtr bytes, size_t length, size_t cursor)
 {
     struct byte_buffer* buff = malloc(sizeof(struct byte_buffer));
     buff->bytes = bytes;
     buff->length = length;
     buff->cursor = cursor;
+    return buff;
+}
+
+struct byte_buffer* FSMakeSubBufferWithRange(struct byte_buffer* parent_buffer, NSRange r)
+{
+    struct byte_buffer* buff = malloc(sizeof(struct byte_buffer));
+    buff->bytes = &(parent_buffer->bytes[r.location]);
+    buff->length = r.length;
+    buff->cursor = 0;
     return buff;
 }
 
@@ -39,6 +48,29 @@ NSRange FSByteBufferScanUntilOneOfSequence(struct byte_buffer* scanner, struct b
     
     scanner->cursor += ret.length+1;
     
+    return ret;
+}
+
+NSRange FSByteBufferScanUntilNotOneOfBytes(struct byte_buffer* scanner, voidPtr buffer, size_t length)
+{
+    NSRange ret = NSMakeRange(scanner->cursor, 0);
+    size_t i;
+    
+    while (ret.length + scanner->cursor < scanner->length) {
+        for (i=0;
+             i < length;
+             ++i) {
+            if (((uint8*)scanner->bytes)[scanner->cursor+ret.length]!=((uint8*)buffer)[i]) {
+                scanner->cursor+=ret.length;
+                return ret;
+            } else {
+                ret.length++;
+            }
+        }
+    }
+    
+    // no match
+    scanner->cursor += ret.length;
     return ret;
 }
 
@@ -127,7 +159,7 @@ NSString* FSNSStringFromCharRange(const struct char_range ran)
     return [NSString stringWithFormat:@"{ begin: %c end: %c }", ran.begin, ran.end];
 }
 
-NSString* FSNSStringFromBytes(const void* bytes, size_t len)
+NSString* FSNSStringFromBytes(const voidPtr bytes, size_t len)
 {
     NSMutableString* str = [NSMutableString stringWithCapacity:3*len];
     for (size_t i=0;
@@ -138,7 +170,7 @@ NSString* FSNSStringFromBytes(const void* bytes, size_t len)
     return str;
 }
 
-NSString* FSNSStringFromBytesAsASCII(const void* bytes, size_t len)
+NSString* FSNSStringFromBytesAsASCII(const voidPtr bytes, size_t len)
 {
     NSMutableString* str = [NSMutableString stringWithCapacity:3*len]; // guesstimate
     for (size_t i=0;

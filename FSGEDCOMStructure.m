@@ -50,4 +50,11 @@
     return nil;
 }
 
+- (struct byte_buffer*)obtainSingleLine:(struct byte_buffer*)buff
+{
+    FSByteBufferScanUntilNotOneOfBytes(buff, "\n\r", 2);
+    struct byte_buffer* sub_buff = FSMakeSubBufferWithRange(buff, FSByteBufferScanUntilOneOfSequence(buff, FSByteSequencesNewlinesLong().sequences, FSByteSequencesNewlinesLong().length));
+    return sub_buff;
+}
+
 @end

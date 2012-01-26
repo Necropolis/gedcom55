@@ -40,7 +40,7 @@
     
     NSMutableDictionary* warn_and_err = [[NSMutableDictionary alloc] init];
     
-    struct byte_buffer* buff = FSMakeByteBuffer([data bytes], [data length], 0);
+    struct byte_buffer* buff = FSMakeByteBuffer((const voidPtr)[data bytes], [data length], 0);
         
     uint8 ansel_or_ascii[] = { 0x30, 0x20       }; BOOL is_ansel_or_ascii = 0==memcmp(buff->bytes, ansel_or_ascii, 2);
     uint8 utf8[]           = { 0xEF, 0xBB, 0xBF }; BOOL is_utf8           = 0==memcmp(buff->bytes, utf8,           3);

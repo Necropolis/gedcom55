@@ -19,5 +19,6 @@ struct byte_sequence; // fwd ref
 - (struct byte_sequence)respondsTo;
 
 - (NSDictionary*)parseStructure:(struct byte_buffer*)buff;
+- (struct byte_buffer*)obtainSingleLine:(struct byte_buffer*)buff;
 
 @end
