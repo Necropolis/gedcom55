@@ -91,6 +91,11 @@ size_t FSByteBufferHasByteSequence(const struct byte_buffer, const struct byte_s
 
 struct byte_sequence_array FSByteSequencesNewlinesShort(void); // \r & \n
 struct byte_sequence_array FSByteSequencesNewlinesLong(void); // \r\n & \n\r & \r & \n
+struct byte_sequence_array FSByteSequencesNewlinesLongWithPrefix__cached(size_t);
+struct byte_sequence_array FSByteSequencesNewlinesLongWithPrefix(size_t);
+
+void FSFreeByteSequence(struct byte_sequence);
+void FSFreeByteSequenceArray(struct byte_sequence_array);
 
 NSString* FSNSStringFromByteBuffer(const struct byte_buffer); /// obtain pretty text
 NSString* FSNSStringFromByteSequence(const struct byte_sequence); /// obtain pretty text

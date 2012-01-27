@@ -129,11 +129,62 @@ struct byte_sequence_array FSByteSequencesNewlinesLong()
         b.sequences = malloc(sizeof(struct byte_sequence) * 4);
         b.sequences[0].bytes = "\r\n"; b.sequences[0].length = 2;
         b.sequences[1].bytes = "\n\r"; b.sequences[1].length = 2;
-        b.sequences[2].bytes = "\r"  ; b.sequences[2].length = 1;
-        b.sequences[3].bytes = "\n"  ; b.sequences[3].length = 1;
+        b.sequences[2].bytes = "\n"  ; b.sequences[2].length = 1;
+        b.sequences[3].bytes = "\r"  ; b.sequences[3].length = 1;
         b.length = 4;
     });
     return b;
+}
+
+struct byte_sequence_array FSByteSequencesNewlinesLongWithPrefix(size_t pfx)
+{
+    struct byte_sequence_array b;
+    char c[50];
+    sprintf(c, "%lu", pfx);
+    unsigned long i=strlen(c);
+    b.sequences = malloc(sizeof(struct byte_sequence) * 4);
+    b.sequences[0].length = i+2; b.sequences[0].bytes = malloc(sizeof(char)*b.sequences[0].length); sprintf(b.sequences[0].bytes, "\r\n%lu", pfx);
+    b.sequences[1].length = i+2; b.sequences[1].bytes = malloc(sizeof(char)*b.sequences[1].length); sprintf(b.sequences[1].bytes, "\n\r%lu", pfx);
+    b.sequences[2].length = i+1; b.sequences[2].bytes = malloc(sizeof(char)*b.sequences[2].length); sprintf(b.sequences[2].bytes,   "\n%lu", pfx);
+    b.sequences[3].length = i+1; b.sequences[3].bytes = malloc(sizeof(char)*b.sequences[3].length); sprintf(b.sequences[3].bytes,   "\r%lu", pfx);
+    b.length = 4;
+    return b;
+}
+
+struct byte_sequence_array FSByteSequencesNewlinesLongWithPrefix__cached(size_t pfx)
+{
+    static ssize_t cache_up_to = -1;
+    static struct byte_sequence_array* ba = NULL;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        ba = malloc(sizeof(struct byte_sequence_array)*1);
+        ba[0] = FSByteSequencesNewlinesLongWithPrefix(0);
+        cache_up_to=0;
+    });
+    if (pfx>cache_up_to) {
+        // grow the cache
+        ba = realloc(ba, sizeof(struct byte_sequence_array)*(pfx+1));
+        for (ssize_t i = cache_up_to+1;
+             i < pfx;
+             ++i) ba[i] = FSByteSequencesNewlinesLongWithPrefix(i);
+        cache_up_to = pfx;
+    }
+    return ba[pfx];
+}
+
+void FSFreeByteSequence(struct byte_sequence s)
+{
+    free(s.bytes);
+}
+
+void FSFreeByteSequenceArray(struct byte_sequence_array b)
+{
+    for (size_t i=0;
+         i<b.length;
+         ++i) {
+        FSFreeByteSequence(b.sequences[i]);
+        free(b.sequences);
+    }
 }
 
 NSString* FSNSStringFromByteBuffer(const struct byte_buffer buff)
@@ -161,6 +212,7 @@ NSString* FSNSStringFromCharRange(const struct char_range ran)
 
 NSString* FSNSStringFromBytes(const voidPtr bytes, size_t len)
 {
+    if (0==len) return @"";
     NSMutableString* str = [NSMutableString stringWithCapacity:3*len];
     for (size_t i=0;
          i < len;
@@ -172,6 +224,7 @@ NSString* FSNSStringFromBytes(const voidPtr bytes, size_t len)
 
 NSString* FSNSStringFromBytesAsASCII(const voidPtr bytes, size_t len)
 {
+    if (0==len) return @"";
     NSMutableString* str = [NSMutableString stringWithCapacity:3*len]; // guesstimate
     for (size_t i=0;
          i < len;

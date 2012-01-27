@@ -11,6 +11,8 @@
 #include <objc/runtime.h>
 
 #import "FSGEDCOMStructure.h"
+#import "ByteBuffer.h"
+#import "ByteSequence.h"
 #import "FSByteScanner.h"
 
 @interface FSGEDCOM (__parser_common__)
@@ -40,27 +42,37 @@
     
     NSMutableDictionary* warn_and_err = [[NSMutableDictionary alloc] init];
     
-    struct byte_buffer* buff = FSMakeByteBuffer((const voidPtr)[data bytes], [data length], 0);
+    ByteBuffer* _buff = [[ByteBuffer alloc] initWithBytes:(const voidPtr)[data bytes] cursor:0 length:[data length] copy:YES];
         
-    uint8 ansel_or_ascii[] = { 0x30, 0x20       }; BOOL is_ansel_or_ascii = 0==memcmp(buff->bytes, ansel_or_ascii, 2);
-    uint8 utf8[]           = { 0xEF, 0xBB, 0xBF }; BOOL is_utf8           = 0==memcmp(buff->bytes, utf8,           3);
-    uint8 unicode1[]       = { 0x30, 0x00       }; BOOL is_unicode1       = 0==memcmp(buff->bytes, unicode1,       2);
-    uint8 unicode2[]       = { 0x00, 0x30       }; BOOL is_unicode2       = 0==memcmp(buff->bytes, unicode2,       2);
+    uint8 ansel_or_ascii[] = { 0x30, 0x20       }; BOOL is_ansel_or_ascii = 0==memcmp(_buff.bytes, ansel_or_ascii, 2);
+    uint8 utf8[]           = { 0xEF, 0xBB, 0xBF }; BOOL is_utf8           = 0==memcmp(_buff.bytes, utf8,           3);
+    uint8 unicode1[]       = { 0x30, 0x00       }; BOOL is_unicode1       = 0==memcmp(_buff.bytes, unicode1,       2);
+    uint8 unicode2[]       = { 0x00, 0x30       }; BOOL is_unicode2       = 0==memcmp(_buff.bytes, unicode2,       2);
     
     if (is_ansel_or_ascii) {
         [warn_and_err setObject:@"I don't support ANSEL or ASCII encoding. Sorry." forKey:FSGEDCOMErrorCode.UnsupportedEncoding];
-        free(buff); // fatal, coz I'm not dealing with it, yoh.
         return warn_and_err;
     } else if (!is_unicode1 && !is_unicode2 && !is_utf8) { // not fatal, however the behavior is undefined.
         [warn_and_err setObject:@"Data lacks a header byte pattern for Unicode support (per pg. 63-64 of GEDCOM 5.5 spec). If this isn't Unicode, then the behavior of the parse is undefined and the program may crash." forKey:FSGEDCOMErrorCode.UnknownEncoding];
     }
     
-    if (is_utf8) buff->cursor += 3;
-    else if (is_unicode1||is_unicode2) buff->cursor += 2;
+    if (is_utf8) _buff.cursor += 3;
+    else if (is_unicode1||is_unicode2) _buff.cursor += 2;
     
-    [self parseStructure:buff];
-    
-    free(buff);
+    NSRange r; ByteBuffer * _subbuffer;
+    while ([_buff hasMoreBytes]) {
+        r = [_buff scanUntilOneOfByteSequences:[ByteSequence newlineByteSequencesWithIntegerPrefix:0]];
+        _subbuffer = [_buff byteBufferWithRange:r];
+        [_subbuffer scanUntilNotOneOfBytes:"\r\n" length:2];
+        [_buff scanUntilNotOneOfBytes:"\r\n" length:2];
+        NSLog(@"record buffer: %@", _subbuffer);
+        NSLog(@"main buffer: %@", _buff);
+    }
+//    NSRange r = FSByteBufferScanUntilOneOfSequence(buff, FSByteSequencesNewlinesLongWithPrefix__cached(0).sequences, FSByteSequencesNewlinesLongWithPrefix__cached(0).length);
+//    
+//    NSLog(@"range: %@", NSStringFromRange(r));
+//    
+//    [self parseStructure:buff];
     
     return warn_and_err;
 }
