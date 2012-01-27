@@ -17,6 +17,11 @@
 }
 
 - (void)parseSource:(ByteBuffer *)buff;
+- (void)parseDestination:(ByteBuffer *)buff;
+- (void)parseDate:(ByteBuffer *)buff;
+- (void)parseFile:(ByteBuffer *)buff;
+- (void)parseGedc:(ByteBuffer *)buff;
+- (void)parseCharset:(ByteBuffer *)buff;
 
 @end
 
@@ -41,7 +46,12 @@
         [buff scanUntilNextLine];
         r = [buff scanUntilOneOfByteSequences:[ByteSequence newlineByteSequencesWithIntegerPrefix:1]];
         recordPart = [buff byteBufferWithRange:r];
-        if (0==memcmp(recordPart->_bytes, "1 SOUR ", 7)) { [self parseSource:recordPart]; }
+             if (0==memcmp(recordPart->_bytes, "1 SOUR ", 7)) { [self parseSource:     recordPart]; }
+        else if (0==memcmp(recordPart->_bytes, "1 DEST ", 7)) { [self parseDestination:recordPart]; }
+        else if (0==memcmp(recordPart->_bytes, "1 DATE ", 7)) { [self parseDate:       recordPart]; }
+        else if (0==memcmp(recordPart->_bytes, "1 FILE ", 7)) { [self parseFile:       recordPart]; }
+        else if (0==memcmp(recordPart->_bytes, "1 GEDC", 6)) { [self parseGedc:       recordPart]; }
+        else if (0==memcmp(recordPart->_bytes, "1 CHAR ", 7)) { [self parseCharset:    recordPart]; }
         else {
             NSLog(@"Found record part at %@", recordPart);
         }
@@ -52,7 +62,32 @@
 
 - (void)parseSource:(ByteBuffer *)buff
 {
-    NSLog(@"I'm about to parse a source record at %@", buff);
+    NSLog(@"I'm about to parse a source record part at %@", buff);
+}
+
+- (void)parseDestination:(ByteBuffer *)buff
+{
+    NSLog(@"I'm about to parse a destination record part at %@", buff);
+}
+
+- (void)parseDate:(ByteBuffer *)buff
+{
+    NSLog(@"I'm about to parse a date record part at %@", buff);
+}
+
+- (void)parseFile:(ByteBuffer *)buff
+{
+    NSLog(@"I'm about to parse a file record part at %@", buff);
+}
+
+- (void)parseGedc:(ByteBuffer *)buff
+{
+    NSLog(@"I'm about to parse a GEDC record part at %@", buff);
+}
+
+- (void)parseCharset:(ByteBuffer *)buff
+{
+    NSLog(@"I'm about to parse a charset record part at %@", buff);
 }
 
 @end
