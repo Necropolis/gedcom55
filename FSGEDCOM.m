@@ -79,13 +79,8 @@
 
 - (FSGEDCOMStructure*)parseStructure:(ByteBuffer *)buff
 {
-    // Decide what kind of structure this is and hand off to the next parser accordingly.
-    
-    // detect next line ending
     NSRange firstLineRange= [buff scanUntilOneOfByteSequences:[ByteSequence newlineByteSequences]];
-    // create a new dummy byte_buffer that thinks it ends at the line ending
     ByteBuffer * firstLine = [buff byteBufferWithRange:firstLineRange];
-    
     for (Class c in [FSGEDCOMStructure registeredSubclasses]) {
         // scan for the respondsTo byte_sequence in the dummy byte_buffer
         if ([c respondsTo:firstLine]) {
@@ -94,9 +89,6 @@
             return s;
         }
     }
-    
-    // if the cursor for buff is beyond the cursor for the dummy buffer, then nothing responded to this structure; output some information and throw an error
-        
     return nil;
 }
 
