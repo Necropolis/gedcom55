@@ -11,6 +11,15 @@
 #import "ByteBuffer.h"
 #import "ByteSequence.h"
 
+@interface FSGEDCOMHead (__impl__) {
+@private
+    
+}
+
+- (void)parseSource:(ByteBuffer *)buff;
+
+@end
+
 @implementation FSGEDCOMHead
 
 @synthesize source=_source;
@@ -32,10 +41,18 @@
         [buff scanUntilNextLine];
         r = [buff scanUntilOneOfByteSequences:[ByteSequence newlineByteSequencesWithIntegerPrefix:1]];
         recordPart = [buff byteBufferWithRange:r];
-        NSLog(@"Found record part at %@", recordPart);
+        if (0==memcmp(recordPart->_bytes, "1 SOUR ", 7)) { [self parseSource:recordPart]; }
+        else {
+            NSLog(@"Found record part at %@", recordPart);
+        }
     }
 
     return nil;
+}
+
+- (void)parseSource:(ByteBuffer *)buff
+{
+    NSLog(@"I'm about to parse a source record at %@", buff);
 }
 
 @end
