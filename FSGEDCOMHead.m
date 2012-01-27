@@ -25,8 +25,16 @@
 
 - (NSDictionary*)parseStructure:(ByteBuffer *)buff
 {
+    NSRange r; ByteBuffer * recordPart;
+    
     // do something here...
-    [buff scanUntilNextLine];
+    while ([buff hasMoreBytes]) {
+        [buff scanUntilNextLine];
+        r = [buff scanUntilOneOfByteSequences:[ByteSequence newlineByteSequencesWithIntegerPrefix:1]];
+        recordPart = [buff byteBufferWithRange:r];
+        NSLog(@"Found record part at %@", recordPart);
+    }
+    
     NSLog(@"About to parse HEAD with %@", buff);
     
     
