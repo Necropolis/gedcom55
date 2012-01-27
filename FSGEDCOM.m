@@ -8,12 +8,10 @@
 
 #import "FSGEDCOM.h"
 
-#include <objc/runtime.h>
-
 #import "FSGEDCOMStructure.h"
+
 #import "ByteBuffer.h"
 #import "ByteSequence.h"
-#import "FSByteScanner.h"
 
 @interface FSGEDCOM (__parser_common__)
 

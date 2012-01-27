@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Christopher Miller. All rights reserved.
 //
 
-#include "FSByteScanner.h"
+#include "BytePrinting.h"
 
 NSString* FSNSStringFromBytes(const voidPtr bytes, size_t len)
 {

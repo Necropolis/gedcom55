@@ -8,8 +8,7 @@
 
 #import "ByteSequence.h"
 
-#import "FSByteScanner.h" // for FSNSStringFromBytes(const voidPtr, size_t)
-// for FSNSStringFromBytesAsASCII(const voidPtr, size_t)
+#import "BytePrinting.h"
 
 @implementation ByteSequence
 

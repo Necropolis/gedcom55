@@ -8,8 +8,6 @@
 
 #import <Foundation/Foundation.h>
 
-struct byte_sequence; // forward declaration
-
 extern const struct FSGEDCOMErrorCode {
     __unsafe_unretained NSString* UnsupportedEncoding;
     __unsafe_unretained NSString* UnknownEncoding;
