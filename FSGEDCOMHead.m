@@ -34,11 +34,7 @@
         recordPart = [buff byteBufferWithRange:r];
         NSLog(@"Found record part at %@", recordPart);
     }
-    
-    NSLog(@"About to parse HEAD with %@", buff);
-    
-    
-    
+
     return nil;
 }
 

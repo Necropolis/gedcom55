@@ -117,9 +117,9 @@
             __indent,
             _cursor,
             __indent,
-            FSNSStringFromBytes(_bytes+_cursor, MIN(peek_len, _length-_cursor)),
+            FSNSStringFromBytes(_bytes+_cursor, ([self hasMoreBytes])?MIN(peek_len, _length-_cursor):0),
             __indent,
-            FSNSStringFromBytesAsASCII(_bytes+_cursor, MIN(peek_len, _length-_cursor))];
+            FSNSStringFromBytesAsASCII(_bytes+_cursor, ([self hasMoreBytes])?MIN(peek_len, _length-_cursor):0)];
 }
 
 - (NSString *)description
