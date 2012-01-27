@@ -36,9 +36,24 @@
             sprintf(p, "\n%lu", i);   [at addObject:[[ByteSequence alloc] initWithBytes:p length:1+l]];
             sprintf(p, "\r%lu", i);   [at addObject:[[ByteSequence alloc] initWithBytes:p length:1+l]];
             [a addObject:[at copy]];
+            free(p);
         }
     }
     return [a objectAtIndex:pfx];
+}
+
++ (id)newlineByteSequences
+{
+    static NSArray * a;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        a = [[NSArray alloc] initWithObjects:
+             [[ByteSequence alloc] initWithBytes:"\r\n" length:2],
+             [[ByteSequence alloc] initWithBytes:"\n\r" length:2],
+             [[ByteSequence alloc] initWithBytes:"\n"   length:1],
+             [[ByteSequence alloc] initWithBytes:"\r"   length:1], nil];
+    });
+    return a;
 }
 
 - (id)initWithBytes:(const voidPtr)bytes length:(size_t)length

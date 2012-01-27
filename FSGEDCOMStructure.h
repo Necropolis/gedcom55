@@ -8,17 +8,14 @@
 
 #import <Foundation/Foundation.h>
 
-struct byte_buffer; // fwd ref
-struct byte_sequence; // fwd ref
+@class ByteBuffer;
 
 @interface FSGEDCOMStructure : NSObject
 
 + (NSMutableArray*)registeredSubclasses;
 
-+ (struct byte_sequence)respondsTo;
-- (struct byte_sequence)respondsTo;
++ (BOOL)respondsTo:(ByteBuffer *)buff;
 
-- (NSDictionary*)parseStructure:(struct byte_buffer*)buff;
-- (struct byte_buffer*)obtainSingleLine:(struct byte_buffer*)buff;
+- (NSDictionary*)parseStructure:(ByteBuffer *)buff;
 
 @end

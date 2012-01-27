@@ -19,7 +19,7 @@
 
 + (NSArray*)allStructureClasses;
 
-- (FSGEDCOMStructure*)parseStructure:(struct byte_buffer*)buff;
+- (FSGEDCOMStructure*)parseStructure:(ByteBuffer *)buff;
 
 @end
 
@@ -65,45 +65,38 @@
         _subbuffer = [_buff byteBufferWithRange:r];
         [_subbuffer scanUntilNotOneOfBytes:"\r\n" length:2];
         [_buff scanUntilNotOneOfBytes:"\r\n" length:2];
-        NSLog(@"record buffer: %@", _subbuffer);
-        NSLog(@"main buffer: %@", _buff);
+        FSGEDCOMStructure * structure = [self parseStructure:_subbuffer];
+        if (structure==nil) {
+            if (nil==[warn_and_err objectForKey:@"unknownRecords"]) { [warn_and_err setObject:[NSMutableArray array] forKey:@"unknownRecords"]; }
+            [[warn_and_err objectForKey:@"unknownRecords"] addObject:[NSString stringWithFormat:@"Found an unidentifiable record on line %lu", r.location]];
+        }
     }
-//    NSRange r = FSByteBufferScanUntilOneOfSequence(buff, FSByteSequencesNewlinesLongWithPrefix__cached(0).sequences, FSByteSequencesNewlinesLongWithPrefix__cached(0).length);
-//    
-//    NSLog(@"range: %@", NSStringFromRange(r));
-//    
-//    [self parseStructure:buff];
     
     return warn_and_err;
 }
 
 #pragma mark Parser Common
 
-- (FSGEDCOMStructure*)parseStructure:(struct byte_buffer*)buff
+- (FSGEDCOMStructure*)parseStructure:(ByteBuffer *)buff
 {
     // Decide what kind of structure this is and hand off to the next parser accordingly.
     
     // detect next line ending
-    size_t cur = buff->cursor;
-    NSRange lineRange=
-    FSByteBufferScanUntilOneOfSequence(buff, FSByteSequencesNewlinesLong().sequences, FSByteSequencesNewlinesLong().length);
+    NSRange firstLineRange= [buff scanUntilOneOfByteSequences:[ByteSequence newlineByteSequences]];
     // create a new dummy byte_buffer that thinks it ends at the line ending
-    struct byte_buffer* dbuff = FSMakeByteBuffer(buff->bytes, lineRange.length+lineRange.location, cur);
+    ByteBuffer * firstLine = [buff byteBufferWithRange:firstLineRange];
     
     for (Class c in [FSGEDCOMStructure registeredSubclasses]) {
         // scan for the respondsTo byte_sequence in the dummy byte_buffer
-        if (NSNotFound!=FSByteBufferHasByteSequence(*dbuff, [c respondsTo])) {
-            // parse using c
-            FSGEDCOMStructure* s = [[c alloc] init];
+        if ([c respondsTo:firstLine]) {
+            FSGEDCOMStructure * s = [[c alloc] init];
             [s parseStructure:buff];
-            break;
+            return s;
         }
     }
     
     // if the cursor for buff is beyond the cursor for the dummy buffer, then nothing responded to this structure; output some information and throw an error
-    
-    free(dbuff); // not used anymore
-    
+        
     return nil;
 }
 

@@ -8,7 +8,7 @@
 
 #import "FSGEDCOMStructure.h"
 
-#import "FSByteScanner.h"
+#import "ByteBuffer.h"
 
 @implementation FSGEDCOMStructure
 
@@ -32,29 +32,16 @@
     }
 }
 
-+ (struct byte_sequence)respondsTo
++ (BOOL)respondsTo:(ByteBuffer *)buff
 {
     [NSException raise:@"Pure Virtual Called" format:@"%s is supposed to be pure-virtual", __PRETTY_FUNCTION__];
-    struct byte_sequence s;
-    return s;
+    return NO;
 }
 
-- (struct byte_sequence)respondsTo
-{
-    return [[self class] respondsTo];
-}
-
-- (NSDictionary*)parseStructure:(struct byte_buffer*)buff
+- (NSDictionary*)parseStructure:(ByteBuffer *)buff
 {
     [NSException raise:@"Pure Virtual Called" format:@"%s is supposed to be pure-virtual", __PRETTY_FUNCTION__];
     return nil;
-}
-
-- (struct byte_buffer*)obtainSingleLine:(struct byte_buffer*)buff
-{
-    FSByteBufferScanUntilNotOneOfBytes(buff, "\n\r", 2);
-    struct byte_buffer* sub_buff = FSMakeSubBufferWithRange(buff, FSByteBufferScanUntilOneOfSequence(buff, FSByteSequencesNewlinesLong().sequences, FSByteSequencesNewlinesLong().length));
-    return sub_buff;
 }
 
 @end

@@ -8,7 +8,8 @@
 
 #import "FSGEDCOMHead.h"
 
-#import "FSByteScanner.h"
+#import "ByteBuffer.h"
+#import "ByteSequence.h"
 
 @implementation FSGEDCOMHead
 
@@ -16,21 +17,17 @@
 
 + (void)load { [super load]; }
 
-+ (struct byte_sequence)respondsTo
++ (BOOL)respondsTo:(ByteBuffer *)buff
 {
-    struct byte_sequence seq = {
-        .bytes = "0 HEAD",
-        .length = 6
-    }; // don't worry, it's stuck in code as a .data block!
-    return seq;
+    if (0==memcmp(buff->_bytes, "0 HEAD", 6)) return YES;
+    else return NO;
 }
 
-- (NSDictionary*)parseStructure:(struct byte_buffer *)buff
+- (NSDictionary*)parseStructure:(ByteBuffer *)buff
 {
     // do something here...
-    struct byte_buffer* sub_buff = [self obtainSingleLine:buff];
-    NSLog(@"Sub-buffer: %@", FSNSStringFromByteBuffer(*sub_buff));
-    NSLog(@"About to parse GEDCOM HEAD using %@", FSNSStringFromByteBuffer(*buff));
+    NSLog(@"About to parse HEAD with %@", buff);
+    
     return nil;
 }
 
