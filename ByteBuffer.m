@@ -68,6 +68,8 @@
     return ret;
 }
 
+- (NSRange)scanUntilNextLine { return [self scanUntilNotOneOfBytes:"\r\n" length:2]; }
+
 - (NSRange)scanUntilNotOneOfBytes:(const voidPtr)bytes length:(size_t)length
 {
     NSRange ret = NSMakeRange(_cursor, 0);

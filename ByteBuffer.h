@@ -30,6 +30,7 @@
 - (id)initWithBytes:(const voidPtr)bytes cursor:(size_t)cursor length:(size_t)length copy:(BOOL)cpy;
 
 - (NSRange)scanUntilOneOfByteSequences:(NSArray *)sequences;
+- (NSRange)scanUntilNextLine;
 - (NSRange)scanUntilNotOneOfBytes:(const voidPtr)bytes length:(size_t)length;
 
 - (id)byteBufferWithRange:(NSRange)range;
