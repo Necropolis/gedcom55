@@ -67,7 +67,7 @@
     else return NO;
 }
 
-- (NSDictionary*)parseStructure:(ByteBuffer *)buff
+- (NSDictionary*)parseStructure:(ByteBuffer *)buff withLevel:(size_t)level
 {
     NSRange r; ByteBuffer * recordPart;
     
@@ -75,18 +75,13 @@
     
     while ([buff hasMoreBytes]) {
         [buff skipNewlines];
-        r = [buff scanUntilOneOfByteSequences:[ByteSequence newlineByteSequencesWithIntegerPrefix:1]];
+        r = [buff scanUntilOneOfByteSequences:[ByteSequence newlineByteSequencesWithIntegerPrefix:level+1]];
         recordPart = [buff byteBufferWithRange:r];
-             if (0==memcmp(recordPart->_bytes, "1 SOUR ", 7)) { [self parseSource:     recordPart]; }
-        else if (0==memcmp(recordPart->_bytes, "1 DEST ", 7)) { [self parseDestination:recordPart]; }
-        else if (0==memcmp(recordPart->_bytes, "1 DATE ", 7)) { [self parseDate:       recordPart]; }
-        else if (0==memcmp(recordPart->_bytes, "1 FILE ", 7)) { [self parseFile:       recordPart]; }
-        else if (0==memcmp(recordPart->_bytes, "1 GEDC" , 6)) { [self parseGedc:       recordPart]; }
-        else if (0==memcmp(recordPart->_bytes, "1 CHAR ", 7)) { [self parseCharset:    recordPart]; }
-        else {
-            
-            NSLog(@"Found record part at %@", recordPart);
-        }
+        Class c = [[self class] structureRespondingToByteBuffer:recordPart];
+        FSGEDCOMStructure * s = [[c?:[FSGEDCOMStructure class] alloc] init];
+        [s parseStructure:recordPart withLevel:level+1];
+        recordPart->_cursor=0;
+        NSLog(@"Found record bit of type %@ at %@", [s recordType], recordPart);
     }
 
     return nil;
@@ -99,6 +94,6 @@
 
 #pragma mark - NSObject
 
-+ (void)load { [super load]; }
+//+ (void)load { [super load]; }
 
 @end

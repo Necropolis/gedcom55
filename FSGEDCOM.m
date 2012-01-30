@@ -61,13 +61,17 @@
     while ([_buff hasMoreBytes]) {
         r = [_buff scanUntilOneOfByteSequences:[ByteSequence newlineByteSequencesWithIntegerPrefix:0]];
         _subbuffer = [_buff byteBufferWithRange:r];
-        [_subbuffer skipNewlines];
+//        [_subbuffer skipNewlines];
         [_buff skipNewlines];
+        NSLog(@"Foobar? : %@", _subbuffer);
         FSGEDCOMStructure * structure = [self parseStructure:_subbuffer];
         if (structure==nil) {
             if (nil==[warn_and_err objectForKey:@"unknownRecords"]) { [warn_and_err setObject:[NSMutableArray array] forKey:@"unknownRecords"]; }
             [[warn_and_err objectForKey:@"unknownRecords"] addObject:[NSString stringWithFormat:@"Found an unidentifiable record at offset 0x%08qX", r.location]];
         }
+        
+        getchar();
+        
     }
     
     return warn_and_err;
@@ -81,7 +85,7 @@
     FSGEDCOMStructure * s = nil;
     if (c) s = [[c alloc] init];
     else s = [[FSGEDCOMStructure alloc] init];
-    [s parseStructure:buff];
+    [s parseStructure:buff withLevel:0];
     return s;
 }
 

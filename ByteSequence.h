@@ -21,7 +21,8 @@
 @property (readwrite, assign) size_t length;
 
 + (id)newlineByteSequencesWithIntegerPrefix:(size_t)pfx;
-+ (id)newlineByteSequences;
++ (id)newlineByteSequences; // \r\n, \n\r, \n, \r
++ (id)whitespaceByteSequences; // non-newline whitespace
 
 - (id)initWithBytes:(const voidPtr)bytes length:(size_t)length; // copies bytes
 

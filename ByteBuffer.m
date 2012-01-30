@@ -14,6 +14,7 @@
 
 @implementation ByteBuffer {
     BOOL _freeOnDealloc;
+    size_t _locationInParent;
 }
 
 @synthesize bytes=_bytes;
@@ -42,6 +43,12 @@
 
 - (NSRange)scanUntilOneOfByteSequences:(NSArray *)sequences
 {
+    Class __byteSequenceClass = [ByteSequence class];
+    [sequences enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        NSAssert([obj class]==__byteSequenceClass,
+                 @"Dude, you freakin screwed up again and now there's a %@ class in an array which really should be of only %@", NSStringFromClass([obj class]), NSStringFromClass(__byteSequenceClass));
+    }];
+    
     NSRange ret = NSMakeRange(_cursor, 0);
     size_t i; NSUInteger num_sequences = [sequences count];
     ByteSequence * b;
@@ -104,16 +111,31 @@
     return ret;
 }
 
+- (NSString *)stringFromRange:(NSRange)r encoding:(NSStringEncoding)encoding
+{
+    return [[NSString alloc] initWithBytes:&_bytes[r.location] length:r.length encoding:encoding];
+}
+
 - (id)byteBufferWithRange:(NSRange)range
 {
     ByteBuffer * buff=[[ByteBuffer alloc] initWithBytes:&_bytes[range.location] cursor:0 length:MIN(range.length, _length-range.location) copy:NO];
     buff.parent = self;
+    buff->_locationInParent = range.location;
     return buff;
 }
 
 - (BOOL)hasMoreBytes
 {
     return _cursor < _length;
+}
+
+- (size_t)globalOffsetOfByte:(size_t)pos
+{
+    if (_parent) {
+        return [_parent globalOffsetOfByte:_locationInParent+pos];
+    } else {
+        return pos;
+    }
 }
 
 - (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level

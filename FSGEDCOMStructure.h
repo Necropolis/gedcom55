@@ -13,15 +13,16 @@
 @interface FSGEDCOMStructure : NSObject
 
 // A dict of all the elements in the structure which the subclass doesn't know how to parse
-@property (readwrite, strong) NSMutableDictionary * elements;
+@property (readwrite, strong) NSMutableArray * elements;
 
 + (NSMutableArray*)registeredSubclasses;
 + (Class)structureRespondingToByteBuffer:(ByteBuffer *)buff;
 
 + (BOOL)respondsTo:(ByteBuffer *)buff;
 
-- (NSDictionary*)parseStructure:(ByteBuffer *)buff;
+- (NSDictionary*)parseStructure:(ByteBuffer *)buff withLevel:(size_t)level;
 
 - (NSString *)recordType;
+- (NSString *)recordBody;
 
 @end

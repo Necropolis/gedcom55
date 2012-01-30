@@ -34,8 +34,11 @@
 - (NSRange)skipLine;
 - (NSRange)scanUntilNotOneOfBytes:(const voidPtr)bytes length:(size_t)length;
 
+- (NSString *)stringFromRange:(NSRange)r encoding:(NSStringEncoding)encoding;
+
 - (id)byteBufferWithRange:(NSRange)range;
 
 - (BOOL)hasMoreBytes;
+- (size_t)globalOffsetOfByte:(size_t)pos;
 
 @end

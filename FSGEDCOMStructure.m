@@ -9,8 +9,12 @@
 #import "FSGEDCOMStructure.h"
 
 #import "ByteBuffer.h"
+#import "ByteSequence.h"
 
-@implementation FSGEDCOMStructure
+@implementation FSGEDCOMStructure {
+    NSString* _recordType;
+    NSString* _recordBody;
+}
 
 @synthesize elements=_elements;
 
@@ -34,6 +38,66 @@
     return nil;
 }
 
++ (BOOL)respondsTo:(ByteBuffer *)buff
+{
+    [NSException raise:@"Pure Virtual Called" format:@"%s is supposed to be pure-virtual", __PRETTY_FUNCTION__];
+    return NO;
+}
+
+- (NSDictionary*)parseStructure:(ByteBuffer *)buff withLevel:(size_t)level
+{
+    NSRange r; ByteBuffer * recordPart;
+    
+    r = [buff skipLine]; // skip line prevents infinite recursion
+    
+    // work with that thar line
+    recordPart = [buff byteBufferWithRange:r];
+    [recordPart scanUntilOneOfByteSequences:[ByteSequence whitespaceByteSequences]];
+    _recordType = [recordPart stringFromRange:[recordPart scanUntilOneOfByteSequences:[[ByteSequence newlineByteSequences] arrayByAddingObjectsFromArray:[ByteSequence whitespaceByteSequences]]] encoding:NSUTF8StringEncoding];
+    _recordBody = [recordPart stringFromRange:[recordPart skipLine] encoding:NSUTF8StringEncoding];
+    if (0==level) {
+        NSLog(@"%2lu: Parsing record of type %@ at %lu with body of: %@", level, _recordType, [buff globalOffsetOfByte:0], _recordBody);
+    }
+    
+    while ([buff hasMoreBytes]) {
+        [buff skipNewlines];
+        r = [buff scanUntilOneOfByteSequences:[ByteSequence newlineByteSequencesWithIntegerPrefix:level+1]];
+        recordPart = [buff byteBufferWithRange:r];
+        Class c = [[self class] structureRespondingToByteBuffer:recordPart];
+        FSGEDCOMStructure * s = [[c?:[FSGEDCOMStructure class] alloc] init];
+        [s parseStructure:recordPart withLevel:level+1];
+        recordPart->_cursor=0;
+        NSLog(@"%2lu: Found record bit of type %@ at %lu", level+1, [s recordType], [recordPart globalOffsetOfByte:0]);
+        
+        [_elements addObject:s];
+    }
+    
+    __block BOOL bodyChanged = NO;
+    [_elements enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        if (![obj isKindOfClass:[FSGEDCOMStructure class]]) return;
+        FSGEDCOMStructure * s = (FSGEDCOMStructure *)obj;
+        NSMutableString * recordBody = [[NSMutableString alloc] initWithString:_recordBody];
+        if ([[s recordType] isEqualToString:@"CONT"]) { // continued
+            [recordBody appendFormat:@"\n%@", [s recordBody]];
+            bodyChanged = YES;
+        } else if ([[s recordType] isEqualToString:@"CONC"]) { // concatenated
+            [recordBody appendString:[s recordBody]];
+            bodyChanged = YES;
+        }
+        _recordBody = [recordBody copy];
+    }];
+    
+    if (bodyChanged) NSLog(@"%2lu: Record body changed for type %@ at %lu to body of: %@", level, _recordType, [buff globalOffsetOfByte:0], _recordBody);
+    
+    return nil;
+}
+
+- (NSString *)recordType { return _recordType; }
+
+- (NSString *)recordBody { return _recordBody; }
+
+#pragma mark - NSObject
+
 + (void)load
 {
     @autoreleasepool {
@@ -44,29 +108,12 @@
     }
 }
 
-+ (BOOL)respondsTo:(ByteBuffer *)buff
-{
-    [NSException raise:@"Pure Virtual Called" format:@"%s is supposed to be pure-virtual", __PRETTY_FUNCTION__];
-    return NO;
-}
-
-- (NSDictionary*)parseStructure:(ByteBuffer *)buff
-{
-//    [NSException raise:@"Pure Virtual Called" format:@"%s is supposed to be pure-virtual", __PRETTY_FUNCTION__];
-    return nil;
-}
-
-- (NSString *)recordType
-{
-    return @""; // todo: return the likely type from what we've parsed
-}
-
 - (id)init
 {
     self = [super init];
     if (!self) return nil;
     
-    self.elements = [NSMutableDictionary dictionary];
+    self.elements = [NSMutableArray array];
     
     return self;
 }
