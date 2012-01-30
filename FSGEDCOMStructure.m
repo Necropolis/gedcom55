@@ -10,6 +10,7 @@
 
 #import "ByteBuffer.h"
 #import "ByteSequence.h"
+#import "BytePrinting.h"
 
 @implementation FSGEDCOMStructure {
     NSString* _recordType;
@@ -54,10 +55,8 @@
     recordPart = [buff byteBufferWithRange:r];
     [recordPart scanUntilOneOfByteSequences:[ByteSequence whitespaceByteSequences]];
     _recordType = [recordPart stringFromRange:[recordPart scanUntilOneOfByteSequences:[[ByteSequence newlineByteSequences] arrayByAddingObjectsFromArray:[ByteSequence whitespaceByteSequences]]] encoding:NSUTF8StringEncoding];
-    _recordBody = [recordPart stringFromRange:[recordPart skipLine] encoding:NSUTF8StringEncoding];
-    if (0==level) {
-        NSLog(@"%2lu: Parsing record of type %@ at %lu with body of: %@", level, _recordType, [buff globalOffsetOfByte:0], _recordBody);
-    }
+    _recordBody = [recordPart stringFromRange:[recordPart scanUntilOneOfByteSequences:[ByteSequence newlineByteSequences]] encoding:NSUTF8StringEncoding];
+    NSLog(@"%2lu %@@%lu %@", level, _recordType, [buff globalOffsetOfByte:0], FSNSStringFromBytesAsASCII((voidPtr)[_recordBody UTF8String], strlen([_recordBody UTF8String])));
     
     while ([buff hasMoreBytes]) {
         [buff skipNewlines];
@@ -67,7 +66,7 @@
         FSGEDCOMStructure * s = [[c?:[FSGEDCOMStructure class] alloc] init];
         [s parseStructure:recordPart withLevel:level+1];
         recordPart->_cursor=0;
-        NSLog(@"%2lu: Found record bit of type %@ at %lu", level+1, [s recordType], [recordPart globalOffsetOfByte:0]);
+//        NSLog(@"%2lu: Found record bit of type %@ at %lu", level+1, [s recordType], [recordPart globalOffsetOfByte:0]);
         
         [_elements addObject:s];
     }
@@ -87,7 +86,7 @@
         _recordBody = [recordBody copy];
     }];
     
-    if (bodyChanged) NSLog(@"%2lu: Record body changed for type %@ at %lu to body of: %@", level, _recordType, [buff globalOffsetOfByte:0], _recordBody);
+    if (bodyChanged) NSLog(@"%2lu: Record body changed for type %@ at %lu to body of: %@", level, _recordType, [buff globalOffsetOfByte:0], FSNSStringFromBytesAsASCII((voidPtr)[_recordBody UTF8String], strlen([_recordBody UTF8String])));
     
     return nil;
 }
