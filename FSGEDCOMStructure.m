@@ -15,6 +15,7 @@
 @implementation FSGEDCOMStructure {
     NSString* _recordType;
     NSString* _recordBody;
+    size_t _parsedOffset;
 }
 
 @synthesize elements=_elements;
@@ -46,8 +47,9 @@
 }
 
 - (NSDictionary*)parseStructure:(ByteBuffer *)buff withLevel:(size_t)level
-{
-    NSRange r; ByteBuffer * recordPart;
+{ @autoreleasepool {
+    _parsedOffset = [buff globalOffsetOfByte:0];
+    NSRange r; ByteBuffer * recordPart; NSMutableArray * __elements = [[NSMutableArray alloc] init];
     
     r = [buff skipLine]; // skip line prevents infinite recursion
     
@@ -56,7 +58,7 @@
     [recordPart scanUntilOneOfByteSequences:[ByteSequence whitespaceByteSequences]];
     _recordType = [recordPart stringFromRange:[recordPart scanUntilOneOfByteSequences:[[ByteSequence newlineByteSequences] arrayByAddingObjectsFromArray:[ByteSequence whitespaceByteSequences]]] encoding:NSUTF8StringEncoding];
     _recordBody = [recordPart stringFromRange:[recordPart scanUntilOneOfByteSequences:[ByteSequence newlineByteSequences]] encoding:NSUTF8StringEncoding];
-    NSLog(@"%2lu %@@%lu %@", level, _recordType, [buff globalOffsetOfByte:0], FSNSStringFromBytesAsASCII((voidPtr)[_recordBody UTF8String], strlen([_recordBody UTF8String])));
+//    NSLog(@"%2lu %@@%lu %@", level, _recordType, _parsedOffset, FSNSStringFromBytesAsASCII((voidPtr)[_recordBody UTF8String], strlen([_recordBody UTF8String])));
     
     while ([buff hasMoreBytes]) {
         [buff skipNewlines];
@@ -68,32 +70,77 @@
         recordPart->_cursor=0;
 //        NSLog(@"%2lu: Found record bit of type %@ at %lu", level+1, [s recordType], [recordPart globalOffsetOfByte:0]);
         
-        [_elements addObject:s];
+        [__elements addObject:s];
     }
     
+// comment me out to stop the printfs!
+//#define BODY_CHANGED_PRINTFS
+#ifdef BODY_CHANGED_PRINTFS
     __block BOOL bodyChanged = NO;
-    [_elements enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+#endif
+    __block NSMutableArray * toRemove = [NSMutableArray array];
+    [__elements enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         if (![obj isKindOfClass:[FSGEDCOMStructure class]]) return;
         FSGEDCOMStructure * s = (FSGEDCOMStructure *)obj;
         NSMutableString * recordBody = [[NSMutableString alloc] initWithString:_recordBody];
         if ([[s recordType] isEqualToString:@"CONT"]) { // continued
             [recordBody appendFormat:@"\n%@", [s recordBody]];
+            [toRemove addObject:obj];
+#ifdef BODY_CHANGED_PRINTFS
             bodyChanged = YES;
+#endif
         } else if ([[s recordType] isEqualToString:@"CONC"]) { // concatenated
             [recordBody appendString:[s recordBody]];
+            [toRemove addObject:obj];
+#ifdef BODY_CHANGED_PRINTFS
             bodyChanged = YES;
+#endif
         }
         _recordBody = [recordBody copy];
     }];
     
+    [__elements removeObjectsInArray:toRemove];
+    toRemove = nil;
+    
+    [__elements enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        if (![obj isKindOfClass:[FSGEDCOMStructure class]]) return;
+        FSGEDCOMStructure * s = (FSGEDCOMStructure *)obj;
+        NSString * __recordType = [s recordType];
+        if (nil==[_elements objectForKey:__recordType]) [_elements setObject:[NSMutableArray array] forKey:__recordType];
+        [[_elements objectForKey:__recordType] addObject:s];
+    }];
+    __elements = nil;
+    
+#ifdef BODY_CHANGED_PRINTFS
     if (bodyChanged) NSLog(@"%2lu: Record body changed for type %@ at %lu to body of: %@", level, _recordType, [buff globalOffsetOfByte:0], FSNSStringFromBytesAsASCII((voidPtr)[_recordBody UTF8String], strlen([_recordBody UTF8String])));
+#endif
+#ifdef BODY_CHANGED_PRINTFS
+#undef BODY_CHANGED_PRINTFS
+#endif
+    
+    if (0==level)
+        NSLog(@"%@", [[self fs_descriptionDictionary] fs_description]);
     
     return nil;
-}
+} }
 
 - (NSString *)recordType { return _recordType; }
 
 - (NSString *)recordBody { return _recordBody; }
+
+#pragma mark - DescriptionDict
+
+- (NSDictionary *)fs_descriptionDictionary
+{
+    NSMutableDictionary * dict = [[NSMutableDictionary alloc] init];
+    
+    [dict setObject:[NSNumber numberWithUnsignedLongLong:_parsedOffset] forKey:@"_parsedOffset"];
+    [dict setObject:_recordBody forKey:@"_recordBody"];
+    [dict setObject:_recordType forKey:@"_recordType"];
+    [dict setObject:_elements forKey:@"_elements"];
+    
+    return dict;
+}
 
 #pragma mark - NSObject
 
@@ -112,7 +159,7 @@
     self = [super init];
     if (!self) return nil;
     
-    self.elements = [NSMutableArray array];
+    self.elements = [NSMutableDictionary dictionary];
     
     return self;
 }

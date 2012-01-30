@@ -8,12 +8,14 @@
 
 #import <Foundation/Foundation.h>
 
+#import "NSContainers+DebugPrint.h"
+
 @class ByteBuffer;
 
-@interface FSGEDCOMStructure : NSObject
+@interface FSGEDCOMStructure : NSObject <DescriptionDict>
 
 // A dict of all the elements in the structure which the subclass doesn't know how to parse
-@property (readwrite, strong) NSMutableArray * elements;
+@property (readwrite, strong) NSMutableDictionary * elements;
 
 + (NSMutableArray*)registeredSubclasses;
 + (Class)structureRespondingToByteBuffer:(ByteBuffer *)buff;
@@ -24,5 +26,7 @@
 
 - (NSString *)recordType;
 - (NSString *)recordBody;
+
+- (NSDictionary *)fs_descriptionDictionary;
 
 @end
