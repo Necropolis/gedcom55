@@ -1,0 +1,3 @@
+[submodule "vendor/NSContainers+PrettyPrint"]
+	path = vendor/NSContainers+PrettyPrint
+	url = git@github.com:NSError/NSContainers-PrettyPrint.git
