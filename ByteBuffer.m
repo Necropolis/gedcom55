@@ -52,6 +52,7 @@
              i < num_sequences;
              ++i) { // memcmp can be assumed to be quite performant
             b = [sequences objectAtIndex:i];
+//            if (b->_length + ret.length >= _length) continue;
             if (0==memcmp(&self->_bytes[ret.length+_cursor], b->_bytes, b->_length)) {
                 _cursor += ret.length+1;
                 return ret;
@@ -67,7 +68,16 @@
     return ret;
 }
 
-- (NSRange)scanUntilNextLine { return [self scanUntilNotOneOfBytes:"\r\n" length:2]; }
+- (NSRange)skipNewlines { return [self scanUntilNotOneOfBytes:"\r\n" length:2]; }
+
+- (NSRange)skipLine
+{
+    NSRange r = NSMakeRange(_cursor, 0);
+    [self scanUntilOneOfByteSequences:[ByteSequence newlineByteSequences]];
+    [self skipNewlines];
+    r.length = _cursor-r.location;
+    return r;
+}
 
 - (NSRange)scanUntilNotOneOfBytes:(const voidPtr)bytes length:(size_t)length
 {

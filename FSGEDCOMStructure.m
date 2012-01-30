@@ -12,6 +12,8 @@
 
 @implementation FSGEDCOMStructure
 
+@synthesize elements=_elements;
+
 + (NSMutableArray*)registeredSubclasses
 {
     static NSMutableArray* registeredSubclasses;
@@ -20,6 +22,16 @@
         registeredSubclasses = [[NSMutableArray alloc] init];
     });
     return registeredSubclasses;
+}
+
++ (Class)structureRespondingToByteBuffer:(ByteBuffer *)buff
+{
+    for (Class c in [FSGEDCOMStructure registeredSubclasses]) {
+        if ([c respondsTo:buff]) {
+            return c;
+        }
+    }
+    return nil;
 }
 
 + (void)load
@@ -40,8 +52,23 @@
 
 - (NSDictionary*)parseStructure:(ByteBuffer *)buff
 {
-    [NSException raise:@"Pure Virtual Called" format:@"%s is supposed to be pure-virtual", __PRETTY_FUNCTION__];
+//    [NSException raise:@"Pure Virtual Called" format:@"%s is supposed to be pure-virtual", __PRETTY_FUNCTION__];
     return nil;
+}
+
+- (NSString *)recordType
+{
+    return @""; // todo: return the likely type from what we've parsed
+}
+
+- (id)init
+{
+    self = [super init];
+    if (!self) return nil;
+    
+    self.elements = [NSMutableDictionary dictionary];
+    
+    return self;
 }
 
 @end

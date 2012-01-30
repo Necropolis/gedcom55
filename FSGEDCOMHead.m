@@ -29,37 +29,6 @@
 
 @synthesize source=_source;
 
-+ (void)load { [super load]; }
-
-+ (BOOL)respondsTo:(ByteBuffer *)buff
-{
-    if (0==memcmp(buff->_bytes, "0 HEAD", 6)) return YES;
-    else return NO;
-}
-
-- (NSDictionary*)parseStructure:(ByteBuffer *)buff
-{
-    NSRange r; ByteBuffer * recordPart;
-    
-    // do something here...
-    while ([buff hasMoreBytes]) {
-        [buff scanUntilNextLine];
-        r = [buff scanUntilOneOfByteSequences:[ByteSequence newlineByteSequencesWithIntegerPrefix:1]];
-        recordPart = [buff byteBufferWithRange:r];
-             if (0==memcmp(recordPart->_bytes, "1 SOUR ", 7)) { [self parseSource:     recordPart]; }
-        else if (0==memcmp(recordPart->_bytes, "1 DEST ", 7)) { [self parseDestination:recordPart]; }
-        else if (0==memcmp(recordPart->_bytes, "1 DATE ", 7)) { [self parseDate:       recordPart]; }
-        else if (0==memcmp(recordPart->_bytes, "1 FILE ", 7)) { [self parseFile:       recordPart]; }
-        else if (0==memcmp(recordPart->_bytes, "1 GEDC", 6)) { [self parseGedc:       recordPart]; }
-        else if (0==memcmp(recordPart->_bytes, "1 CHAR ", 7)) { [self parseCharset:    recordPart]; }
-        else {
-            NSLog(@"Found record part at %@", recordPart);
-        }
-    }
-
-    return nil;
-}
-
 - (void)parseSource:(ByteBuffer *)buff
 {
     NSLog(@"I'm about to parse a source record part at %@", buff);
@@ -89,5 +58,47 @@
 {
     NSLog(@"I'm about to parse a charset record part at %@", buff);
 }
+
+#pragma mark - FSGEDCOMStructure
+
++ (BOOL)respondsTo:(ByteBuffer *)buff
+{
+    if (0==memcmp(buff->_bytes, "0 HEAD", 6)) return YES;
+    else return NO;
+}
+
+- (NSDictionary*)parseStructure:(ByteBuffer *)buff
+{
+    NSRange r; ByteBuffer * recordPart;
+    
+    [buff skipLine]; // fast-forward through the first line
+    
+    while ([buff hasMoreBytes]) {
+        [buff skipNewlines];
+        r = [buff scanUntilOneOfByteSequences:[ByteSequence newlineByteSequencesWithIntegerPrefix:1]];
+        recordPart = [buff byteBufferWithRange:r];
+             if (0==memcmp(recordPart->_bytes, "1 SOUR ", 7)) { [self parseSource:     recordPart]; }
+        else if (0==memcmp(recordPart->_bytes, "1 DEST ", 7)) { [self parseDestination:recordPart]; }
+        else if (0==memcmp(recordPart->_bytes, "1 DATE ", 7)) { [self parseDate:       recordPart]; }
+        else if (0==memcmp(recordPart->_bytes, "1 FILE ", 7)) { [self parseFile:       recordPart]; }
+        else if (0==memcmp(recordPart->_bytes, "1 GEDC" , 6)) { [self parseGedc:       recordPart]; }
+        else if (0==memcmp(recordPart->_bytes, "1 CHAR ", 7)) { [self parseCharset:    recordPart]; }
+        else {
+            
+            NSLog(@"Found record part at %@", recordPart);
+        }
+    }
+
+    return nil;
+}
+
+- (NSString *)recordType
+{
+    return @"HEAD";
+}
+
+#pragma mark - NSObject
+
++ (void)load { [super load]; }
 
 @end

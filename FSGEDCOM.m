@@ -61,8 +61,8 @@
     while ([_buff hasMoreBytes]) {
         r = [_buff scanUntilOneOfByteSequences:[ByteSequence newlineByteSequencesWithIntegerPrefix:0]];
         _subbuffer = [_buff byteBufferWithRange:r];
-        [_subbuffer scanUntilNextLine];
-        [_buff scanUntilNextLine];
+        [_subbuffer skipNewlines];
+        [_buff skipNewlines];
         FSGEDCOMStructure * structure = [self parseStructure:_subbuffer];
         if (structure==nil) {
             if (nil==[warn_and_err objectForKey:@"unknownRecords"]) { [warn_and_err setObject:[NSMutableArray array] forKey:@"unknownRecords"]; }
@@ -77,17 +77,12 @@
 
 - (FSGEDCOMStructure*)parseStructure:(ByteBuffer *)buff
 {
-    NSRange firstLineRange= [buff scanUntilOneOfByteSequences:[ByteSequence newlineByteSequences]];
-    ByteBuffer * firstLine = [buff byteBufferWithRange:firstLineRange];
-    for (Class c in [FSGEDCOMStructure registeredSubclasses]) {
-        // scan for the respondsTo byte_sequence in the dummy byte_buffer
-        if ([c respondsTo:firstLine]) {
-            FSGEDCOMStructure * s = [[c alloc] init];
-            [s parseStructure:buff];
-            return s;
-        }
-    }
-    return nil;
+    Class c = [FSGEDCOMStructure structureRespondingToByteBuffer:buff];
+    FSGEDCOMStructure * s = nil;
+    if (c) s = [[c alloc] init];
+    else s = [[FSGEDCOMStructure alloc] init];
+    [s parseStructure:buff];
+    return s;
 }
 
 #pragma mark NSObject
