@@ -13,6 +13,8 @@
 #import "ByteBuffer.h"
 #import "ByteSequence.h"
 
+#import "NSContainers+DebugPrint.h"
+
 @interface FSGEDCOM (__parser_common__)
 
 + (NSArray*)allStructureClasses;
@@ -57,6 +59,8 @@
     if (is_utf8) _buff.cursor += 3;
     else if (is_unicode1||is_unicode2) _buff.cursor += 2;
     
+    NSMutableArray * structures = [[NSMutableArray alloc] init];
+    
     NSRange r; ByteBuffer * _subbuffer;
     while ([_buff hasMoreBytes]) {
         r = [_buff scanUntilOneOfByteSequences:[ByteSequence newlineByteSequencesWithIntegerPrefix:0]];
@@ -68,9 +72,11 @@
             [[warn_and_err objectForKey:@"unknownRecords"] addObject:[NSString stringWithFormat:@"Found an unidentifiable record at offset 0x%08qX", r.location]];
         }
         
-//        getchar();
+        [structures addObject:structure];
         
     }
+    
+    NSLog(@"%@", structures);
     
     return warn_and_err;
 }

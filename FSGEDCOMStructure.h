@@ -12,7 +12,7 @@
 
 @class ByteBuffer;
 
-@interface FSGEDCOMStructure : NSObject <DescriptionDict>
+@interface FSGEDCOMStructure : NSObject <FSDescriptionDict>
 
 // A dict of all the elements in the structure which the subclass doesn't know how to parse
 @property (readwrite, strong) NSMutableDictionary * elements;
@@ -26,7 +26,5 @@
 
 - (NSString *)recordType;
 - (NSString *)recordBody;
-
-- (NSDictionary *)fs_descriptionDictionary;
 
 @end
