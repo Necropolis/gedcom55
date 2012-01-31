@@ -119,7 +119,7 @@
 #endif
     
     if (0==level)
-        NSLog(@"%@", [[self fs_descriptionDictionary] fs_description]);
+        NSLog(@"%@", [self fs_descriptionDictionary]);
     
     return nil;
 } }
@@ -134,10 +134,18 @@
 {
     NSMutableDictionary * dict = [[NSMutableDictionary alloc] init];
     
+    NSMutableArray * arr = [[NSMutableArray alloc] init];
+    for (id _element in _elements) {
+        if ([_element respondsToSelector:@selector(fs_descriptionDictionary)])
+            [arr addObject:[_element fs_descriptionDictionary]];
+        else
+            [arr addObject:_element];
+    }
+    
     [dict setObject:[NSNumber numberWithUnsignedLongLong:_parsedOffset] forKey:@"_parsedOffset"];
     [dict setObject:_recordBody forKey:@"_recordBody"];
     [dict setObject:_recordType forKey:@"_recordType"];
-    [dict setObject:_elements forKey:@"_elements"];
+    [dict setObject:arr forKey:@"_elements"];
     
     return dict;
 }
