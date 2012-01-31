@@ -27,6 +27,9 @@
 
 - (NSDictionary*)parse:(NSData*)data
 {
+    NSError * error;
+    [NSObject fs_swizzleContainerPrinters:&error];
+    if (error) return nil;
     // TODO: Scan through the GEDCOM, line by line!
     // Use FSByteScanner to do this!
     
