@@ -8,9 +8,13 @@
 
 #import <Foundation/Foundation.h>
 
+#import "FSGEDCOM.h"
 #import "NSContainers+DebugPrint.h"
 
 @class ByteBuffer;
+
+extern NSString * kLongLines;
+extern size_t kMaxLineLength;
 
 @interface FSGEDCOMStructure : NSObject <FSDescriptionDict>
 
@@ -22,7 +26,9 @@
 
 + (BOOL)respondsTo:(ByteBuffer *)buff;
 
-- (NSDictionary*)parseStructure:(ByteBuffer *)buff withLevel:(size_t)level;
+- (NSDictionary *)parseStructure:(ByteBuffer *)buff withLevel:(size_t)level delegate:(FSGEDCOM *)dg; // you probably don't want to override this
+
+- (NSDictionary *)postParse; // subclasses will want to implement this, called after parseStructure. Run through elements to pull out specific kinds of data you want in a more scema-strong layout.
 
 - (NSString *)recordType;
 - (NSString *)recordBody;

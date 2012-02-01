@@ -23,7 +23,11 @@
 
 @end
 
-@implementation FSGEDCOM
+@implementation FSGEDCOM {
+    NSMutableDictionary * _warnings;
+}
+
+@synthesize structures=_structures;
 
 - (NSDictionary*)parse:(NSData*)data
 {
@@ -43,8 +47,6 @@
     // graphemes with reasonable success, so that level of data-smashing will probably be done in C
     // and then the combined void* region will be passed through to NSString.
     
-    NSMutableDictionary* warn_and_err = [[NSMutableDictionary alloc] init];
-    
     ByteBuffer* _buff = [[ByteBuffer alloc] initWithBytes:(const voidPtr)[data bytes] cursor:0 length:[data length] copy:YES];
         
     uint8 ansel_or_ascii[] = { 0x30, 0x20       }; BOOL is_ansel_or_ascii = 0==memcmp(_buff.bytes, ansel_or_ascii, 2);
@@ -53,16 +55,14 @@
     uint8 unicode2[]       = { 0x00, 0x30       }; BOOL is_unicode2       = 0==memcmp(_buff.bytes, unicode2,       2);
     
     if (is_ansel_or_ascii) {
-        [warn_and_err setObject:@"I don't support ANSEL or ASCII encoding. Sorry." forKey:FSGEDCOMErrorCode.UnsupportedEncoding];
-        return warn_and_err;
+        [self addWarning:@"I don't support any encoding other than UTF-8" ofType:FSGEDCOMErrorCode.UnsupportedEncoding];
+        return _warnings;
     } else if (!is_unicode1 && !is_unicode2 && !is_utf8) { // not fatal, however the behavior is undefined.
-        [warn_and_err setObject:@"Data lacks a header byte pattern for Unicode support (per pg. 63-64 of GEDCOM 5.5 spec). If this isn't Unicode, then the behavior of the parse is undefined and the program may crash." forKey:FSGEDCOMErrorCode.UnknownEncoding];
+        [self addWarning:@"Data lacks a header byte pattern for Unicode support (per pg. 63-64 of GEDCOM 5.5 spec). If this isn't Unicode, then the behavior of the parse is undefined and the program may crash." ofType:FSGEDCOMErrorCode.UnknownEncoding];
     }
     
     if (is_utf8) _buff.cursor += 3;
     else if (is_unicode1||is_unicode2) _buff.cursor += 2;
-    
-    NSMutableArray * structures = [[NSMutableArray alloc] init];
     
     NSRange r; ByteBuffer * _subbuffer;
     while ([_buff hasMoreBytes]) {
@@ -71,17 +71,36 @@
         [_buff skipNewlines];
         FSGEDCOMStructure * structure = [self parseStructure:_subbuffer];
         if (structure==nil) {
-            if (nil==[warn_and_err objectForKey:@"unknownRecords"]) { [warn_and_err setObject:[NSMutableArray array] forKey:@"unknownRecords"]; }
-            [[warn_and_err objectForKey:@"unknownRecords"] addObject:[NSString stringWithFormat:@"Found an unidentifiable record at offset 0x%08qX", r.location]];
+            [self addWarning:[NSString stringWithFormat:@"Found an unparseable record at offset 0x%08qX", r.location] ofType:@"unknownRecords"];
         }
         
-        [structures addObject:structure];
+        [_structures addObject:structure];
         
     }
     
-    NSLog(@"%@", structures);
+    return _warnings;
+}
+
+- (void)addWarning:(NSString *)warning ofType:(NSString *)type
+{
+    if (nil==[_warnings objectForKey:type]) [_warnings setObject:[NSMutableArray array] forKey:type];
+    [[_warnings objectForKey:type] addObject:warning];
+}
+
+- (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level
+{
+    NSMutableString * str = [[NSMutableString alloc] init];
+    char * indent = malloc(sizeof(char)*4*level+1);
+    memset(indent, ' ', sizeof(char)*4*level);
+    indent[4*level]='\0';
     
-    return warn_and_err;
+    [str appendFormat:@"%s{\n",indent];
+    [str appendFormat:@"%s    records = %@;\n",indent,[_structures descriptionWithLocale:locale indent:level+1]];
+    [str appendFormat:@"%s    parseWarnings = %@;\n",indent,[_warnings descriptionWithLocale:locale indent:level+1]];
+    [str appendFormat:@"%s}",indent];
+    
+    free(indent);
+    return str;
 }
 
 #pragma mark Parser Common
@@ -92,7 +111,7 @@
     FSGEDCOMStructure * s = nil;
     if (c) s = [[c alloc] init];
     else s = [[FSGEDCOMStructure alloc] init];
-    [s parseStructure:buff withLevel:0];
+    [s parseStructure:buff withLevel:0 delegate:self];
     return s;
 }
 
@@ -101,8 +120,16 @@
 - (id)init {
     self = [super init];
     if (!self) return nil;
+
+    _structures = [[NSMutableArray alloc] init];
+    _warnings = [[NSMutableDictionary alloc] init];
     
     return self;
+}
+
+- (NSString *)description
+{
+    return [self descriptionWithLocale:nil indent:0];
 }
 
 @end

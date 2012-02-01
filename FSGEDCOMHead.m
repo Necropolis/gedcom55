@@ -67,7 +67,7 @@
     else return NO;
 }
 
-- (NSDictionary*)parseStructure:(ByteBuffer *)buff withLevel:(size_t)level
+- (NSDictionary*)parseStructure:(ByteBuffer *)buff withLevel:(size_t)level delegate:(FSGEDCOM *)dg
 {
     NSRange r; ByteBuffer * recordPart;
     
@@ -79,7 +79,7 @@
         recordPart = [buff byteBufferWithRange:r];
         Class c = [[self class] structureRespondingToByteBuffer:recordPart];
         FSGEDCOMStructure * s = [[c?:[FSGEDCOMStructure class] alloc] init];
-        [s parseStructure:recordPart withLevel:level+1];
+        [s parseStructure:recordPart withLevel:level+1 delegate:dg];
         recordPart->_cursor=0;
         NSLog(@"Found record bit of type %@ at %@", [s recordType], recordPart);
     }

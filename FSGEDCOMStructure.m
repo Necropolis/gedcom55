@@ -12,6 +12,9 @@
 #import "ByteSequence.h"
 #import "BytePrinting.h"
 
+NSString * kLongLines = @"longLines";
+size_t kMaxLineLength = 255;
+
 @implementation FSGEDCOMStructure {
     NSString* _recordType;
     NSString* _recordBody;
@@ -46,7 +49,7 @@
     return NO;
 }
 
-- (NSDictionary*)parseStructure:(ByteBuffer *)buff withLevel:(size_t)level
+- (NSDictionary*)parseStructure:(ByteBuffer *)buff withLevel:(size_t)level delegate:(FSGEDCOM *)dg
 { @autoreleasepool {
     _parsedOffset = [buff globalOffsetOfByte:0];
     NSRange r; ByteBuffer * recordPart; NSMutableArray * __elements = [[NSMutableArray alloc] init];
@@ -56,9 +59,12 @@
     // work with that thar line
     recordPart = [buff byteBufferWithRange:r];
     [recordPart scanUntilOneOfByteSequences:[ByteSequence whitespaceByteSequences]];
+    size_t l = [[recordPart stringFromRange:NSMakeRange(0, recordPart->_length) encoding:NSUTF8StringEncoding] length];
+    if (l>=kMaxLineLength) {
+        [dg addWarning:[NSString stringWithFormat:@"Found a line of length %lu which is longer than %lu beginning at offset %lu", l, kMaxLineLength, [recordPart globalOffsetOfByte:0]] ofType:kLongLines];
+    }
     _recordType = [recordPart stringFromRange:[recordPart scanUntilOneOfByteSequences:[[ByteSequence newlineByteSequences] arrayByAddingObjectsFromArray:[ByteSequence whitespaceByteSequences]]] encoding:NSUTF8StringEncoding];
     _recordBody = [recordPart stringFromRange:[recordPart scanUntilOneOfByteSequences:[ByteSequence newlineByteSequences]] encoding:NSUTF8StringEncoding];
-//    NSLog(@"%2lu %@@%lu %@", level, _recordType, _parsedOffset, FSNSStringFromBytesAsASCII((voidPtr)[_recordBody UTF8String], strlen([_recordBody UTF8String])));
     
     while ([buff hasMoreBytes]) {
         [buff skipNewlines];
@@ -66,10 +72,8 @@
         recordPart = [buff byteBufferWithRange:r];
         Class c = [[self class] structureRespondingToByteBuffer:recordPart];
         FSGEDCOMStructure * s = [[c?:[FSGEDCOMStructure class] alloc] init];
-        [s parseStructure:recordPart withLevel:level+1];
+        [s parseStructure:recordPart withLevel:level+1 delegate:dg];
         recordPart->_cursor=0;
-//        NSLog(@"%2lu: Found record bit of type %@ at %lu", level+1, [s recordType], [recordPart globalOffsetOfByte:0]);
-        
         [__elements addObject:s];
     }
     
@@ -118,11 +122,12 @@
 #undef BODY_CHANGED_PRINTFS
 #endif
     
-//    if (0==level)
-//        NSLog(@"%@", self);
+    [self postParse];
     
     return nil;
 } }
+
+- (NSDictionary *)postParse { return nil; }
 
 - (NSString *)recordType { return _recordType; }
 
@@ -140,6 +145,18 @@
     [dict setObject:_elements forKey:@"_elements"];
     
     return dict;
+}
+
+#pragma mark - NSKeyValueCoding
+
+- (id)valueForUndefinedKey:(NSString *)key
+{
+    return [_elements objectForKey:key];
+}
+
+- (void)setValue:(id)value forUndefinedKey:(NSString *)key
+{
+    [_elements setValue:value forKey:key];
 }
 
 #pragma mark - NSObject
