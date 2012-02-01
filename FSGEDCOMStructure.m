@@ -49,7 +49,7 @@ size_t kMaxLineLength = 255;
     return NO;
 }
 
-- (NSDictionary*)parseStructure:(ByteBuffer *)buff withLevel:(size_t)level delegate:(FSGEDCOM *)dg
+- (void)parseStructure:(ByteBuffer *)buff withLevel:(size_t)level delegate:(FSGEDCOM *)dg
 { @autoreleasepool {
     _parsedOffset = [buff globalOffsetOfByte:0];
     NSRange r; ByteBuffer * recordPart; NSMutableArray * __elements = [[NSMutableArray alloc] init];
@@ -122,12 +122,12 @@ size_t kMaxLineLength = 255;
 #undef BODY_CHANGED_PRINTFS
 #endif
     
-    [self postParse];
+    [self postParse:dg];
     
-    return nil;
+    ;
 } }
 
-- (NSDictionary *)postParse { return nil; }
+- (void)postParse:(FSGEDCOM *)dg { ; }
 
 - (NSString *)recordType { return _recordType; }
 

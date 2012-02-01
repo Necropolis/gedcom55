@@ -26,9 +26,9 @@ extern size_t kMaxLineLength;
 
 + (BOOL)respondsTo:(ByteBuffer *)buff;
 
-- (NSDictionary *)parseStructure:(ByteBuffer *)buff withLevel:(size_t)level delegate:(FSGEDCOM *)dg; // you probably don't want to override this
+- (void)parseStructure:(ByteBuffer *)buff withLevel:(size_t)level delegate:(FSGEDCOM *)dg; // you probably don't want to override this
 
-- (NSDictionary *)postParse; // subclasses will want to implement this, called after parseStructure. Run through elements to pull out specific kinds of data you want in a more scema-strong layout.
+- (void)postParse:(FSGEDCOM *)dg; // subclasses will want to implement this, called after parseStructure. Run through elements to pull out specific kinds of data you want in a more scema-strong layout.
 
 - (NSString *)recordType;
 - (NSString *)recordBody;

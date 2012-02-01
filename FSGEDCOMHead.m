@@ -8,6 +8,8 @@
 
 #import "FSGEDCOMHead.h"
 
+#import "FSGEDCOM.h"
+
 #import "ByteBuffer.h"
 #import "ByteSequence.h"
 
@@ -16,48 +18,9 @@
     
 }
 
-- (void)parseSource:(ByteBuffer *)buff;
-- (void)parseDestination:(ByteBuffer *)buff;
-- (void)parseDate:(ByteBuffer *)buff;
-- (void)parseFile:(ByteBuffer *)buff;
-- (void)parseGedc:(ByteBuffer *)buff;
-- (void)parseCharset:(ByteBuffer *)buff;
-
 @end
 
 @implementation FSGEDCOMHead
-
-@synthesize source=_source;
-
-- (void)parseSource:(ByteBuffer *)buff
-{
-    NSLog(@"I'm about to parse a source record part at %@", buff);
-}
-
-- (void)parseDestination:(ByteBuffer *)buff
-{
-    NSLog(@"I'm about to parse a destination record part at %@", buff);
-}
-
-- (void)parseDate:(ByteBuffer *)buff
-{
-    NSLog(@"I'm about to parse a date record part at %@", buff);
-}
-
-- (void)parseFile:(ByteBuffer *)buff
-{
-    NSLog(@"I'm about to parse a file record part at %@", buff);
-}
-
-- (void)parseGedc:(ByteBuffer *)buff
-{
-    NSLog(@"I'm about to parse a GEDC record part at %@", buff);
-}
-
-- (void)parseCharset:(ByteBuffer *)buff
-{
-    NSLog(@"I'm about to parse a charset record part at %@", buff);
-}
 
 #pragma mark - FSGEDCOMStructure
 
@@ -67,24 +30,19 @@
     else return NO;
 }
 
-- (NSDictionary*)parseStructure:(ByteBuffer *)buff withLevel:(size_t)level delegate:(FSGEDCOM *)dg
-{
-    NSRange r; ByteBuffer * recordPart;
-    
-    [buff skipLine]; // fast-forward through the first line
-    
-    while ([buff hasMoreBytes]) {
-        [buff skipNewlines];
-        r = [buff scanUntilOneOfByteSequences:[ByteSequence newlineByteSequencesWithIntegerPrefix:level+1]];
-        recordPart = [buff byteBufferWithRange:r];
-        Class c = [[self class] structureRespondingToByteBuffer:recordPart];
-        FSGEDCOMStructure * s = [[c?:[FSGEDCOMStructure class] alloc] init];
-        [s parseStructure:recordPart withLevel:level+1 delegate:dg];
-        recordPart->_cursor=0;
-        NSLog(@"Found record bit of type %@ at %@", [s recordType], recordPart);
-    }
-
-    return nil;
+- (void)postParse:(FSGEDCOM *)dg
+{   // everything is in elements; now to make sense of it
+    // See 55GEDCOM.pdf page 24
+    NSLog(@"%@", [self.elements valueForKey:@"SOUR"
+                  ]);
+    NSArray * requiredKeys = [NSArray arrayWithObjects:
+                              @"SOUR",
+                              @"SUBM",
+                              @"GEDC",
+                              @"CHAR", nil];
+    for (NSString * requiredKey in requiredKeys)
+        if (nil==[self.elements valueForKey:requiredKey])
+            [dg addWarning:[NSString stringWithFormat:@"HEAD record structure lacks a %@ entry. This is illegal per the GEDCOM spec.", requiredKey] ofType:@"missingRequiredElement"];
 }
 
 - (NSString *)recordType
@@ -94,6 +52,6 @@
 
 #pragma mark - NSObject
 
-//+ (void)load { [super load]; }
++ (void)load { [super load]; }
 
 @end

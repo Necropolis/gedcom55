@@ -12,6 +12,4 @@
 
 @interface FSGEDCOMHead : FSGEDCOMStructure
 
-@property (readwrite, strong) NSString* source;
-
 @end
