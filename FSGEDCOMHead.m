@@ -43,12 +43,35 @@
     for (NSString * requiredKey in requiredKeys)
         if (nil==[self.elements valueForKey:requiredKey])
             [dg addWarning:[NSString stringWithFormat:@"HEAD record structure lacks a %@ entry. This is illegal per the GEDCOM spec.", requiredKey] ofType:@"missingRequiredElement"];
+    
+    NSArray * atMostOneOf = [NSArray arrayWithObjects:
+                             @"SOUR.VERS",
+                             @"SOUR.NAME",
+                             @"SOUR.CORP",
+                             @"SOUR.DATA",
+                             @"SOUR.DATA.DATE",
+                             @"SOUR.DATA.COPR",
+                             @"DEST",
+                             @"DATE",
+                             @"DATE.TIME",
+                             @"SUBN",
+                             @"FILE",
+                             @"COPR",
+                             @"CHAR.VERS",
+                             @"LANG",
+                             @"PLAC",
+                             @"NOTE"
+                             , nil];
+    
+    for (NSString * atMostOneOfKey in atMostOneOf)
+        if (nil!=[self.elements valueForKeyPath:atMostOneOfKey]) if (1<[[self.elements valueForKeyPath:atMostOneOfKey] count])
+            [dg addWarning:[NSString stringWithFormat:@"HEAD record has more than one %@ substructure, which is illegal per the GEDCOM spec.", atMostOneOfKey] ofType:@"tooManyElements"];
+    
+    if (nil!=[self.elements objectForKey:@"PLAC"]&&(nil==[self.elements valueForKeyPath:@"PLAC.FORM"]||1<[[self.elements valueForKeyPath:@"PLAC.FORM"] count]))
+        [dg addWarning:@"HEAD record's PLAC substructure lacks a FORM definition or has too many of them, which is illegal per the GEDCOM spec." ofType:@"specBreach"];
 }
 
-- (NSString *)recordType
-{
-    return @"HEAD";
-}
+- (NSString *)recordType { return @"HEAD"; }
 
 #pragma mark - NSObject
 
