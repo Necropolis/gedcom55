@@ -15,11 +15,10 @@
 NSString * kLongLines = @"longLines";
 size_t kMaxLineLength = 255;
 
-@implementation FSGEDCOMStructure {
-    NSString* _recordType;
-    NSString* _recordBody;
-    size_t _parsedOffset;
-}
+@implementation FSGEDCOMStructure
+
+@synthesize recordType=_recordType;
+@synthesize recordBody=_recordBody;
 
 @synthesize elements=_elements;
 
@@ -35,15 +34,27 @@ size_t kMaxLineLength = 255;
 
 + (Class)structureRespondingToByteBuffer:(ByteBuffer *)buff
 {
-    for (Class c in [FSGEDCOMStructure registeredSubclasses]) {
-        if ([c respondsTo:buff]) {
+    for (Class c in [FSGEDCOMStructure registeredSubclasses])
+        if ([c respondsTo:buff])
             return c;
-        }
-    }
+    return nil;
+}
+
++ (Class)structureRespondingToByteBuffer:(ByteBuffer *)buff parentObject:(FSGEDCOMStructure *)parent
+{
+    for (Class c in [FSGEDCOMStructure registeredSubclasses])
+        if ([c respondsTo:buff parentObject:parent])
+            return c;
     return nil;
 }
 
 + (BOOL)respondsTo:(ByteBuffer *)buff
+{
+    [NSException raise:@"Pure Virtual Called" format:@"%s is supposed to be pure-virtual", __PRETTY_FUNCTION__];
+    return NO;
+}
+
++ (BOOL)respondsTo:(ByteBuffer *)buff parentObject:(FSGEDCOMStructure *)parent
 {
     [NSException raise:@"Pure Virtual Called" format:@"%s is supposed to be pure-virtual", __PRETTY_FUNCTION__];
     return NO;
@@ -59,18 +70,30 @@ size_t kMaxLineLength = 255;
     // work with that thar line
     recordPart = [buff byteBufferWithRange:r];
     [recordPart scanUntilOneOfByteSequences:[ByteSequence whitespaceByteSequences]];
-    size_t l = [[recordPart stringFromRange:NSMakeRange(0, recordPart->_length) encoding:NSUTF8StringEncoding] length];
+    NSString * line = [recordPart stringFromRange:NSMakeRange(0, recordPart->_length) encoding:NSUTF8StringEncoding];
+//    if (NSNotFound!=[line rangeOfString:@"INDI"].location)
+//        NSLog(@"Line: %@", line);
+    size_t l = [line length];
     if (l>=kMaxLineLength) {
         [dg addWarning:[NSString stringWithFormat:@"Found a line of length %lu which is longer than %lu beginning at offset %lu", l, kMaxLineLength, [recordPart globalOffsetOfByte:0]] ofType:kLongLines];
     }
-    _recordType = [recordPart stringFromRange:[recordPart scanUntilOneOfByteSequences:[[ByteSequence newlineByteSequences] arrayByAddingObjectsFromArray:[ByteSequence whitespaceByteSequences]]] encoding:NSUTF8StringEncoding];
-    _recordBody = [recordPart stringFromRange:[recordPart scanUntilOneOfByteSequences:[ByteSequence newlineByteSequences]] encoding:NSUTF8StringEncoding];
+    NSRange _recordTypeRange = [recordPart scanUntilOneOfByteSequences:[[ByteSequence newlineByteSequences] arrayByAddingObjectsFromArray:[ByteSequence whitespaceByteSequences]]];
+    NSRange _recordBodyRange = [recordPart scanUntilOneOfByteSequences:[ByteSequence newlineByteSequences]];
+    self.recordType = [recordPart stringFromRange:_recordTypeRange encoding:NSUTF8StringEncoding];
+    self.recordBody = [recordPart stringFromRange:_recordBodyRange encoding:NSUTF8StringEncoding];
+    // keeping the code around, but commented because it can be useful in debugging later
+//    if (NSNotFound!=[line rangeOfString:@"INDI"].location) {
+//        NSLog(@"Record Type Range: %@", NSStringFromRange(_recordTypeRange));
+//        NSLog(@"Record Type:       %@", _recordType);
+//        NSLog(@"Record Body Range: %@", NSStringFromRange(_recordBodyRange));
+//        NSLog(@"Record Body:       %@", _recordBody);
+//    }
     
     while ([buff hasMoreBytes]) {
         [buff skipNewlines];
         r = [buff scanUntilOneOfByteSequences:[ByteSequence newlineByteSequencesWithIntegerPrefix:level+1]];
         recordPart = [buff byteBufferWithRange:r];
-        Class c = [[self class] structureRespondingToByteBuffer:recordPart];
+        Class c = [[self class] structureRespondingToByteBuffer:recordPart parentObject:self];
         FSGEDCOMStructure * s = [[c?:[FSGEDCOMStructure class] alloc] init];
         [s parseStructure:recordPart withLevel:level+1 delegate:dg];
         recordPart->_cursor=0;
@@ -123,28 +146,32 @@ size_t kMaxLineLength = 255;
 #endif
     
     [self postParse:dg];
-    
-    ;
 } }
 
 - (void)postParse:(FSGEDCOM *)dg { ; }
 
-- (NSString *)recordType { return _recordType; }
-
-- (NSString *)recordBody { return _recordBody; }
-
-#pragma mark - DescriptionDict
-
-- (NSDictionary *)fs_descriptionDictionary
+- (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level
 {
-    NSMutableDictionary * dict = [[NSMutableDictionary alloc] init];
+    NSMutableString * str = [[NSMutableString alloc] init];
+    NSString * indent = [NSString fs_stringByFillingWithCharacter:' ' repeated:level*4];
     
-    [dict setObject:[NSNumber numberWithUnsignedLongLong:_parsedOffset] forKey:@"_parsedOffset"];
-    [dict setObject:_recordBody forKey:@"_recordBody"];
-    [dict setObject:_recordType forKey:@"_recordType"];
-    [dict setObject:_elements forKey:@"_elements"];
+    [str appendFormat:@"%@{\n", indent];
+    [str appendFormat:@"%@    _recordType = %@;\n", indent, [_recordType fs_stringByEscaping]];
+    [str appendFormat:@"%@    _recordBody = %@;\n", indent, [_recordBody fs_stringByEscaping]];
+    [str appendFormat:@"%@    _parsedOffset = %@;\n", indent, [[[NSNumber numberWithUnsignedLongLong:_parsedOffset] descriptionWithLocale:locale] fs_stringByEscaping]];
+    [str appendFormat:@"%@    _elements = %@;", indent, [_elements descriptionWithLocale:locale indent:level+1]];
     
-    return dict;
+    return str;
+}
+
+- (id)firstElementOfTypeAndRemoveKeyIfEmpty:(NSString *)key
+{
+    NSMutableArray * a = [_elements objectForKey:key];
+    id obj = nil;
+    if (0<[a count]) obj = [a objectAtIndex:0];
+    if (1<[a count]) [a removeObjectAtIndex:0];
+    else [_elements removeObjectForKey:key];
+    return obj;
 }
 
 #pragma mark - NSKeyValueCoding

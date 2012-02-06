@@ -33,19 +33,7 @@
 {
     NSError * error;
     [NSObject fs_swizzleContainerPrinters:&error];
-    if (error) return nil;
-    // TODO: Scan through the GEDCOM, line by line!
-    // Use FSByteScanner to do this!
-    
-    // GEDCOM 5.5 defines an encoding type of Unicode (probably UTF-8), but older files may use ANSEL
-    
-    // Current battle plan:
-    // Scan through, byte by byte! The plumbing that defines the structure is all ASCII, so that'll
-    // live on 8-bit boundaries. The user-input data may not, however.
-    // There are multi-line strings in GEDCOM 5.5, so these will need to be reconstructed at the byte-
-    // level. Particularly, I'm not confident that Foundation will be able to reconstruct split
-    // graphemes with reasonable success, so that level of data-smashing will probably be done in C
-    // and then the combined void* region will be passed through to NSString.
+    if (error) NSLog(@"Failed to swizzle stuff for pretty printing");
     
     ByteBuffer* _buff = [[ByteBuffer alloc] initWithBytes:(const voidPtr)[data bytes] cursor:0 length:[data length] copy:YES];
         
@@ -77,6 +65,9 @@
         [_structures addObject:structure];
         
     }
+    
+//    [NSObject fs_swizzleContainerPrinters:&error];
+//    if (error) NSLog(@"Failed to swizzle stuff back to normal");
     
     return _warnings;
 }

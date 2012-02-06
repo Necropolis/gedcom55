@@ -10,6 +10,16 @@
 
 #import "FSGEDCOMStructure.h"
 
-@interface FSGEDCOMHead : FSGEDCOMStructure
+@class FSGEDCOMCharset;
 
+@interface FSGEDCOMHead : FSGEDCOMStructure {
+    FSGEDCOMCharset * _charset;
+}
+
+@property (readwrite, strong) FSGEDCOMCharset * charset;
+
+@end
+
+@interface FSGEDCOMCharset : FSGEDCOMStructure
+- (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level;
 @end

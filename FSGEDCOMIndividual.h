@@ -10,4 +10,6 @@
 
 @interface FSGEDCOMIndividual : FSGEDCOMStructure
 
+@property (readwrite, strong) NSString * individualId;
+
 @end
