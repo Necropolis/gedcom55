@@ -159,7 +159,8 @@ size_t kMaxLineLength = 255;
     [str appendFormat:@"%@    _recordType = %@;\n", indent, [_recordType fs_stringByEscaping]];
     [str appendFormat:@"%@    _recordBody = %@;\n", indent, [_recordBody fs_stringByEscaping]];
     [str appendFormat:@"%@    _parsedOffset = %@;\n", indent, [[[NSNumber numberWithUnsignedLongLong:_parsedOffset] descriptionWithLocale:locale] fs_stringByEscaping]];
-    [str appendFormat:@"%@    _elements = %@;", indent, [_elements descriptionWithLocale:locale indent:level+1]];
+    [str appendFormat:@"%@    _elements = %@;\n", indent, [_elements descriptionWithLocale:locale indent:level+1]];
+    [str appendFormat:@"%@}", indent];
     
     return str;
 }

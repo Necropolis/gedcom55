@@ -16,6 +16,8 @@
 @implementation FSGEDCOMHead
 
 @synthesize charset=_charset;
+@synthesize file=_file;
+@synthesize destination=_destination;
 
 - (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level
 {
@@ -27,6 +29,8 @@
     [s appendFormat:@"%@    _recordType = %@;\n", indent, self.recordType];
     [s appendFormat:@"%@    _recordBody = %@;\n", indent, self.recordBody];
     [s appendFormat:@"%@    _charset = %@;\n", indent, [_charset descriptionWithLocale:locale indent:level+1]];
+    [s appendFormat:@"%@    _file = %@;\n", indent, [_file descriptionWithLocale:locale indent:level+1]];
+    [s appendFormat:@"%@    _destination = %@;\n", indent, [_destination descriptionWithLocale:locale indent:level+1]];
     [s appendFormat:@"%@    _parsedOffset = %lu;\n", indent, self->_parsedOffset];
     [s appendFormat:@"%@    _elements = %@;\n", indent, [self.elements descriptionWithLocale:locale indent:level+1]];
     
@@ -88,9 +92,9 @@
         [dg addWarning:@"HEAD record's PLAC substructure lacks a FORM definition or has too many of them, which is illegal per the GEDCOM spec." ofType:@"specBreach"];
     
     self.charset = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"CHAR"];
+    self.file = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"FILE"];
+    self.destination = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"DEST"];
 }
-
-- (NSString *)recordType { return @"HEAD"; }
 
 #pragma mark - NSObject
 
@@ -99,32 +103,72 @@
 @end
 
 @implementation FSGEDCOMCharset
-
 - (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level
 {
     NSMutableString * s = [[NSMutableString alloc] init];
     NSString * indent = [NSString fs_stringByFillingWithCharacter:' ' repeated:level*4];
-    
-    [s appendFormat:@"%@{\n%@    _recordType = %@;\n", indent, indent, self.recordType];
-    [s appendFormat:@"%@    _recordBody = %@;\n", indent, self.recordBody];
+    [s appendFormat:@"%@{\n%@    _recordType = %@;\n", indent, indent, [self.recordType fs_stringByEscaping]];
+    [s appendFormat:@"%@    _recordBody = %@;\n", indent, [self.recordBody fs_stringByEscaping]];
     [s appendFormat:@"%@    _parsedOffset = %lu;\n", indent, self->_parsedOffset];
-    [s appendFormat:@"%@    _hasMoreElements = %@;\n", indent, (0<[self.elements count])?@"YES":@"NO"];
+    [s appendFormat:@"%@    _hasMoreElements = %@;\n", indent, (0<[[self.elements allKeys] count])?@"YES":@"NO"];
     [s appendFormat:@"%@}", indent];
-    
     return s;
 }
-
 #pragma mark - FSGEDCOMStructure
-
 + (BOOL)respondsTo:(ByteBuffer *)buff { return NO; }
 + (BOOL)respondsTo:(ByteBuffer *)buff parentObject:(FSGEDCOMStructure *)parent
 {
     if (0==memcmp(buff->_bytes+2, "CHAR", 4) && [parent isKindOfClass:[FSGEDCOMHead class]]) return YES;
     else return NO;
 }
-
 #pragma mark - NSObject
-
 + (void)load { [super load]; }
+@end
 
+@implementation FSGEDCOMFile
+- (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level
+{
+    NSMutableString * s = [[NSMutableString alloc] init];
+    NSString * indent = [NSString fs_stringByFillingWithCharacter:' ' repeated:4*level];
+    [s appendFormat:@"%@{\n", indent];
+    [s appendFormat:@"%@    _recordType = %@;\n", indent, [self.recordType fs_stringByEscaping]];
+    [s appendFormat:@"%@    _recordBody = %@;\n", indent, [self.recordBody fs_stringByEscaping]];
+    [s appendFormat:@"%@    _parsedOffset = %lu;\n", indent, _parsedOffset];
+    [s appendFormat:@"%@    _hasMoreElements = %@;\n", indent, (0<[[self.elements allKeys] count])?@"YES":@"NO"];
+    [s appendFormat:@"%@}", indent];
+    return s;
+}
+#pragma mark - FSGEDCOMStructure
++ (BOOL)respondsTo:(ByteBuffer *)buff { return NO; }
++ (BOOL)respondsTo:(ByteBuffer *)buff parentObject:(FSGEDCOMStructure *)parent
+{
+    if (0==memcmp(buff->_bytes+2, "FILE", 4) && [parent isKindOfClass:[FSGEDCOMHead class]]) return YES;
+    else return NO;
+}
+#pragma mark - NSObject
++ (void)load { [super load]; }
+@end
+
+@implementation FSGEDCOMDestination
+- (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level
+{
+    NSMutableString * s = [[NSMutableString alloc] init];
+    NSString * indent = [NSString fs_stringByFillingWithCharacter:' ' repeated:4*level];
+    [s appendFormat:@"%@{\n", indent];
+    [s appendFormat:@"%@    _recordType = %@;\n", indent, [self.recordType fs_stringByEscaping]];
+    [s appendFormat:@"%@    _recordBody = %@;\n", indent, [self.recordBody fs_stringByEscaping]];
+    [s appendFormat:@"%@    _parsedOffset = %lu;\n", indent, _parsedOffset];
+    [s appendFormat:@"%@    _hasMoreElements = %@;\n", indent, (0<[[self.elements allKeys] count])?@"YES":@"NO"];
+    [s appendFormat:@"%@}", indent];
+    return s;
+}
+#pragma mark - FSGEDCOMStructure
++ (BOOL)respondsTo:(ByteBuffer *)buff { return NO; }
++ (BOOL)respondsTo:(ByteBuffer *)buff parentObject:(FSGEDCOMStructure *)parent
+{
+    if (0==memcmp(buff->_bytes+2, "DEST", 4) && [parent isKindOfClass:[FSGEDCOMHead class]]) return YES;
+    else return NO;
+}
+#pragma mark - NSObject
++ (void)load { [super load]; }
 @end
