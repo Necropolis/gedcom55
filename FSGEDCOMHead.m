@@ -37,7 +37,7 @@
     return s;
 }
 
-#pragma mark - FSGEDCOMStructure
+#pragma mark FSGEDCOMStructure
 
 + (BOOL)respondsTo:(ByteBuffer *)buff
 {
@@ -95,7 +95,7 @@
     self.destination = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"DEST"];
 }
 
-#pragma mark - NSObject
+#pragma mark NSObject
 
 + (void)load { [super load]; }
 
@@ -113,7 +113,7 @@
     
     return s;
 }
-#pragma mark - FSGEDCOMStructure
+#pragma mark FSGEDCOMStructure
 + (BOOL)respondsTo:(ByteBuffer *)buff { return NO; }
 + (BOOL)respondsTo:(ByteBuffer *)buff parentObject:(FSGEDCOMStructure *)parent
 {
@@ -124,7 +124,19 @@
 {
     ;
 }
-#pragma mark - NSObject
+#pragma mark NSObject
++ (void)load { [super load]; }
+@end
+
+@implementation FSGEDCOMHeaderSourceName
+#pragma mark FSGEDCOMStructure
++ (BOOL)respondsTo:(ByteBuffer *)buff { return NO; }
++ (BOOL)respondsTo:(ByteBuffer *)buff parentObject:(FSGEDCOMStructure *)parent
+{
+    if (0==memcmp(buff->_bytes+2, "NAME", 4) && [parent isKindOfClass:[FSGEDCOMHeaderSource class]]) return YES;
+    else return NO;
+}
+#pragma mark NSObject
 + (void)load { [super load]; }
 @end
 
@@ -142,7 +154,7 @@
 
     return s;
 }
-#pragma mark - FSGEDCOMStructure
+#pragma mark FSGEDCOMStructure
 + (BOOL)respondsTo:(ByteBuffer *)buff { return NO; }
 + (BOOL)respondsTo:(ByteBuffer *)buff parentObject:(FSGEDCOMStructure *)parent
 {
@@ -153,42 +165,42 @@
 {
     self.charsetVersion = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"VERS"];
 }
-#pragma mark - NSObject
+#pragma mark NSObject
 + (void)load { [super load]; }
 @end
 
 @implementation FSGEDCOMCharsetVersion
-#pragma mark - FSGEDCOMStructure
+#pragma mark FSGEDCOMStructure
 + (BOOL)respondsTo:(ByteBuffer *)buff { return NO; }
 + (BOOL)respondsTo:(ByteBuffer *)buff parentObject:(FSGEDCOMStructure *)parent
 {
     if (0==memcmp(buff->_bytes+2, "VERS", 4) && [parent isKindOfClass:[FSGEDCOMCharset class]]) return YES;
     else return NO;
 }
-#pragma mark - NSObject
+#pragma mark NSObject
 + (void)load { [super load]; }
 @end
 
 @implementation FSGEDCOMFile
-#pragma mark - FSGEDCOMStructure
+#pragma mark FSGEDCOMStructure
 + (BOOL)respondsTo:(ByteBuffer *)buff { return NO; }
 + (BOOL)respondsTo:(ByteBuffer *)buff parentObject:(FSGEDCOMStructure *)parent
 {
     if (0==memcmp(buff->_bytes+2, "FILE", 4) && [parent isKindOfClass:[FSGEDCOMHead class]]) return YES;
     else return NO;
 }
-#pragma mark - NSObject
+#pragma mark NSObject
 + (void)load { [super load]; }
 @end
 
 @implementation FSGEDCOMDestination
-#pragma mark - FSGEDCOMStructure
+#pragma mark FSGEDCOMStructure
 + (BOOL)respondsTo:(ByteBuffer *)buff { return NO; }
 + (BOOL)respondsTo:(ByteBuffer *)buff parentObject:(FSGEDCOMStructure *)parent
 {
     if (0==memcmp(buff->_bytes+2, "DEST", 4) && [parent isKindOfClass:[FSGEDCOMHead class]]) return YES;
     else return NO;
 }
-#pragma mark - NSObject
+#pragma mark NSObject
 + (void)load { [super load]; }
 @end

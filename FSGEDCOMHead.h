@@ -35,6 +35,8 @@
 }
 - (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level;
 @end
+@interface FSGEDCOMHeaderSourceName : FSGEDCOMStructure
+@end
 @interface FSGEDCOMCharset : FSGEDCOMStructure {
     FSGEDCOMCharsetVersion * _charsetVersion;
 }
