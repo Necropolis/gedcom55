@@ -102,6 +102,7 @@
 @end
 
 @implementation FSGEDCOMHeaderSource
+@synthesize name=_name;
 - (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level
 {
     NSMutableString * s = [[NSMutableString alloc] init];
@@ -109,6 +110,7 @@
     
     [s fs_appendDictionaryStartWithIndentString:indent];
     [self addBasicElementsToDebugDescription:s locale:locale indentString:indent indentLevel:level];
+    [s fs_appendDictionaryKey:@"_name" value:_name locale:locale indentString:indent indentLevel:level+1];
     [s fs_appendDictionaryEndWithIndentString:indent];
     
     return s;
@@ -122,7 +124,7 @@
 }
 - (void)postParse:(FSGEDCOM *)dg
 {
-    ;
+    self.name = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"NAME"];
 }
 #pragma mark NSObject
 + (void)load { [super load]; }

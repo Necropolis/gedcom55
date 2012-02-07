@@ -157,7 +157,6 @@ size_t kMaxLineLength = 255;
     
     [str fs_appendDictionaryStartWithIndentString:indent];
     [self addBasicElementsToDebugDescription:str locale:locale indentString:indent indentLevel:level];
-    [str fs_appendDictionaryKey:@"_elements" value:_elements locale:locale indentString:indent indentLevel:level+1];
     [str fs_appendDictionaryEndWithIndentString:indent];
     
     return str;
@@ -184,7 +183,7 @@ size_t kMaxLineLength = 255;
 
 - (BOOL)hasMoreElements
 {
-    return 0<[[_elements allKeys] count];
+    return (0<[[_elements allKeys] count]);
 }
 
 #pragma mark - NSKeyValueCoding

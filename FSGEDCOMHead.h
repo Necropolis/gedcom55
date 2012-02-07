@@ -11,6 +11,7 @@
 #import "FSGEDCOMStructure.h"
 
 @class FSGEDCOMHeaderSource;
+@class FSGEDCOMHeaderSourceName;
 @class FSGEDCOMCharset;
 @class FSGEDCOMCharsetVersion;
 @class FSGEDCOMFile;
@@ -31,8 +32,9 @@
 @end
 
 @interface FSGEDCOMHeaderSource : FSGEDCOMStructure {
-
+    FSGEDCOMHeaderSourceName * _name;
 }
+@property (readwrite, strong) FSGEDCOMHeaderSourceName * name;
 - (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level;
 @end
 @interface FSGEDCOMHeaderSourceName : FSGEDCOMStructure
