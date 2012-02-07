@@ -15,6 +15,7 @@
 
 @implementation FSGEDCOMHead
 
+@synthesize source=_source;
 @synthesize charset=_charset;
 @synthesize file=_file;
 @synthesize destination=_destination;
@@ -26,6 +27,7 @@
     
     [s fs_appendDictionaryStartWithIndentString:indent];
     [self addBasicElementsToDebugDescription:s locale:locale indentString:indent indentLevel:level];
+    [s fs_appendDictionaryKey:@"_source" value:_source locale:locale indentString:indent indentLevel:level+1];
     [s fs_appendDictionaryKey:@"_charset" value:_charset locale:locale indentString:indent indentLevel:level+1];
     [s fs_appendDictionaryKey:@"_file" value:_file locale:locale indentString:indent indentLevel:level+1];
     [s fs_appendDictionaryKey:@"_destination" value:_destination locale:locale indentString:indent indentLevel:level+1];
@@ -87,6 +89,7 @@
     if (nil!=[self.elements objectForKey:@"PLAC"]&&(nil==[self.elements valueForKeyPath:@"PLAC.FORM"]||1<[[self.elements valueForKeyPath:@"PLAC.FORM"] count]))
         [dg addWarning:@"HEAD record's PLAC substructure lacks a FORM definition or has too many of them, which is illegal per the GEDCOM spec." ofType:@"specBreach"];
     
+    self.source = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"SOUR"];
     self.charset = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"CHAR"];
     self.file = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"FILE"];
     self.destination = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"DEST"];
@@ -96,6 +99,34 @@
 
 + (void)load { [super load]; }
 
+@end
+
+@implementation FSGEDCOMHeaderSource
+- (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level
+{
+    NSMutableString * s = [[NSMutableString alloc] init];
+    NSString * indent = [NSString fs_stringByFillingWithCharacter:' ' repeated:level*4];
+    
+    [s fs_appendDictionaryStartWithIndentString:indent];
+    [self addBasicElementsToDebugDescription:s locale:locale indentString:indent indentLevel:level];
+    [s fs_appendDictionaryKey:@"_hasMoreElements" value:[NSNumber numberWithBool:[self hasMoreElements]] locale:locale indentString:indent indentLevel:level+1];
+    [s fs_appendDictionaryEndWithIndentString:indent];
+    
+    return s;
+}
+#pragma mark - FSGEDCOMStructure
++ (BOOL)respondsTo:(ByteBuffer *)buff { return NO; }
++ (BOOL)respondsTo:(ByteBuffer *)buff parentObject:(FSGEDCOMStructure *)parent
+{
+    if (0==memcmp(buff->_bytes+2, "SOUR", 4) && [parent isKindOfClass:[FSGEDCOMHead class]]) return YES;
+    else return NO;
+}
+- (void)postParse:(FSGEDCOM *)dg
+{
+    ;
+}
+#pragma mark - NSObject
++ (void)load { [super load]; }
 @end
 
 @implementation FSGEDCOMCharset

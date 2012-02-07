@@ -10,23 +10,31 @@
 
 #import "FSGEDCOMStructure.h"
 
+@class FSGEDCOMHeaderSource;
 @class FSGEDCOMCharset;
 @class FSGEDCOMCharsetVersion;
 @class FSGEDCOMFile;
 @class FSGEDCOMDestination;
 
 @interface FSGEDCOMHead : FSGEDCOMStructure {
+    FSGEDCOMHeaderSource * _source;
     FSGEDCOMCharset * _charset;
     FSGEDCOMFile * _file;
     FSGEDCOMDestination * _destination;
 }
 
+@property (readwrite, strong) FSGEDCOMHeaderSource * source;
 @property (readwrite, strong) FSGEDCOMCharset * charset;
 @property (readwrite, strong) FSGEDCOMFile * file;
 @property (readwrite, strong) FSGEDCOMDestination * destination;
 
 @end
 
+@interface FSGEDCOMHeaderSource : FSGEDCOMStructure {
+
+}
+- (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level;
+@end
 @interface FSGEDCOMCharset : FSGEDCOMStructure {
     FSGEDCOMCharsetVersion * _charsetVersion;
 }
