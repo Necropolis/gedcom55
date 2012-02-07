@@ -17,8 +17,8 @@ size_t kMaxLineLength = 255;
 
 @implementation FSGEDCOMStructure
 
-@synthesize recordType=_recordType;
-@synthesize recordBody=_recordBody;
+@synthesize key=_key;
+@synthesize value=_value;
 
 @synthesize elements=_elements;
 
@@ -79,8 +79,8 @@ size_t kMaxLineLength = 255;
     }
     NSRange _recordTypeRange = [recordPart scanUntilOneOfByteSequences:[[ByteSequence newlineByteSequences] arrayByAddingObjectsFromArray:[ByteSequence whitespaceByteSequences]]];
     NSRange _recordBodyRange = [recordPart scanUntilOneOfByteSequences:[ByteSequence newlineByteSequences]];
-    self.recordType = [recordPart stringFromRange:_recordTypeRange encoding:NSUTF8StringEncoding];
-    self.recordBody = [recordPart stringFromRange:_recordBodyRange encoding:NSUTF8StringEncoding];
+    self.key = [recordPart stringFromRange:_recordTypeRange encoding:NSUTF8StringEncoding];
+    self.value = [recordPart stringFromRange:_recordBodyRange encoding:NSUTF8StringEncoding];
     // keeping the code around, but commented because it can be useful in debugging later
 //    if (NSNotFound!=[line rangeOfString:@"INDI"].location) {
 //        NSLog(@"Record Type Range: %@", NSStringFromRange(_recordTypeRange));
@@ -109,21 +109,21 @@ size_t kMaxLineLength = 255;
     [__elements enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         if (![obj isKindOfClass:[FSGEDCOMStructure class]]) return;
         FSGEDCOMStructure * s = (FSGEDCOMStructure *)obj;
-        NSMutableString * recordBody = [[NSMutableString alloc] initWithString:_recordBody];
-        if ([[s recordType] isEqualToString:@"CONT"]) { // continued
-            [recordBody appendFormat:@"\n%@", [s recordBody]];
+        NSMutableString * recordBody = [[NSMutableString alloc] initWithString:_value];
+        if ([[s key] isEqualToString:@"CONT"]) { // continued
+            [recordBody appendFormat:@"\n%@", [s value]];
             [toRemove addObject:obj];
 #ifdef BODY_CHANGED_PRINTFS
             bodyChanged = YES;
 #endif
-        } else if ([[s recordType] isEqualToString:@"CONC"]) { // concatenated
-            [recordBody appendString:[s recordBody]];
+        } else if ([[s key] isEqualToString:@"CONC"]) { // concatenated
+            [recordBody appendString:[s value]];
             [toRemove addObject:obj];
 #ifdef BODY_CHANGED_PRINTFS
             bodyChanged = YES;
 #endif
         }
-        _recordBody = [recordBody copy];
+        _value = [recordBody copy];
     }];
     
     [__elements removeObjectsInArray:toRemove];
@@ -132,7 +132,7 @@ size_t kMaxLineLength = 255;
     [__elements enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         if (![obj isKindOfClass:[FSGEDCOMStructure class]]) return;
         FSGEDCOMStructure * s = (FSGEDCOMStructure *)obj;
-        NSString * __recordType = [s recordType];
+        NSString * __recordType = [s key];
         if (nil==[_elements objectForKey:__recordType]) [_elements setObject:[NSMutableArray array] forKey:__recordType];
         [[_elements objectForKey:__recordType] addObject:s];
     }];
@@ -155,14 +155,19 @@ size_t kMaxLineLength = 255;
     NSMutableString * str = [[NSMutableString alloc] init];
     NSString * indent = [NSString fs_stringByFillingWithCharacter:' ' repeated:level*4];
     
-    [str appendFormat:@"%@{\n", indent];
-    [str appendFormat:@"%@    _recordType = %@;\n", indent, [_recordType fs_stringByEscaping]];
-    [str appendFormat:@"%@    _recordBody = %@;\n", indent, [_recordBody fs_stringByEscaping]];
-    [str appendFormat:@"%@    _parsedOffset = %@;\n", indent, [[[NSNumber numberWithUnsignedLongLong:_parsedOffset] descriptionWithLocale:locale] fs_stringByEscaping]];
-    [str appendFormat:@"%@    _elements = %@;\n", indent, [_elements descriptionWithLocale:locale indent:level+1]];
-    [str appendFormat:@"%@}", indent];
+    [str fs_appendDictionaryStartWithIndentString:indent];
+    [self addBasicElementsToDebugDescription:str locale:locale indentString:indent indentLevel:level];
+    [str fs_appendDictionaryKey:@"_elements" value:_elements locale:locale indentString:indent indentLevel:level+1];
+    [str fs_appendDictionaryEndWithIndentString:indent];
     
     return str;
+}
+
+- (void)addBasicElementsToDebugDescription:(NSMutableString *)s locale:(id)locale indentString:(NSString *)indentString indentLevel:(NSUInteger)level
+{
+    [s fs_appendDictionaryKey:@"_key" value:_key locale:locale indentString:indentString indentLevel:level+1];
+    [s fs_appendDictionaryKey:@"_value" value:_value locale:locale indentString:indentString indentLevel:level+1];
+    [s fs_appendDictionaryKey:@"_parsedOffset" value:[NSNumber numberWithUnsignedLongLong:_parsedOffset] locale:locale indentString:indentString indentLevel:level+1];
 }
 
 - (id)firstElementOfTypeAndRemoveKeyIfEmpty:(NSString *)key
@@ -173,6 +178,11 @@ size_t kMaxLineLength = 255;
     if (1<[a count]) [a removeObjectAtIndex:0];
     else [_elements removeObjectForKey:key];
     return obj;
+}
+
+- (BOOL)hasMoreElements
+{
+    return 0<[[_elements allKeys] count];
 }
 
 #pragma mark - NSKeyValueCoding

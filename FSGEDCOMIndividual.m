@@ -49,10 +49,10 @@
 
 - (void)postParse:(FSGEDCOM *)dg
 {
-    NSString * tmp = self.recordBody;
-    self.recordBody = self.recordType;
-    self.recordType = tmp;
-    self.individualId = [self.recordBody stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"@"]];
+    NSString * tmp = self.value;
+    self.value = self.key;
+    self.key = tmp;
+    self.individualId = [self.value stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"@"]];
 }
 
 #pragma mark - NSObject
