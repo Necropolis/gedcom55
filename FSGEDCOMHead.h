@@ -42,11 +42,8 @@
 - (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level;
 @end
 @interface FSGEDCOMCharsetVersion : FSGEDCOMStructure
-- (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level;
 @end
 @interface FSGEDCOMFile : FSGEDCOMStructure
-- (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level;
 @end
 @interface FSGEDCOMDestination : FSGEDCOMStructure
-- (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level;
 @end

@@ -168,6 +168,8 @@ size_t kMaxLineLength = 255;
     [s fs_appendDictionaryKey:@"_key" value:_key locale:locale indentString:indentString indentLevel:level+1];
     [s fs_appendDictionaryKey:@"_value" value:_value locale:locale indentString:indentString indentLevel:level+1];
     [s fs_appendDictionaryKey:@"_parsedOffset" value:[NSNumber numberWithUnsignedLongLong:_parsedOffset] locale:locale indentString:indentString indentLevel:level+1];
+    if ([self hasMoreElements])
+        [s fs_appendDictionaryKey:@"_elements" value:_elements locale:locale indentString:indentString indentLevel:level+1];
 }
 
 - (id)firstElementOfTypeAndRemoveKeyIfEmpty:(NSString *)key

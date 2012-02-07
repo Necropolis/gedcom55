@@ -109,7 +109,6 @@
     
     [s fs_appendDictionaryStartWithIndentString:indent];
     [self addBasicElementsToDebugDescription:s locale:locale indentString:indent indentLevel:level];
-    [s fs_appendDictionaryKey:@"_hasMoreElements" value:[NSNumber numberWithBool:[self hasMoreElements]] locale:locale indentString:indent indentLevel:level+1];
     [s fs_appendDictionaryEndWithIndentString:indent];
     
     return s;
@@ -139,7 +138,6 @@
     [s fs_appendDictionaryStartWithIndentString:indent];
     [self addBasicElementsToDebugDescription:s locale:locale indentString:indent indentLevel:level];
     [s fs_appendDictionaryKey:@"_charsetVersion" value:self.charsetVersion locale:locale indentString:indent indentLevel:level+1];
-    [s fs_appendDictionaryKey:@"_hasMoreElements" value:[NSNumber numberWithBool:[self hasMoreElements]] locale:locale indentString:indent indentLevel:level+1];
     [s fs_appendDictionaryEndWithIndentString:indent];
 
     return s;
@@ -160,18 +158,6 @@
 @end
 
 @implementation FSGEDCOMCharsetVersion
-- (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level
-{
-    NSMutableString * s = [[NSMutableString alloc] init];
-    NSString * indent = [NSString fs_stringByFillingWithCharacter:' ' repeated:level*4];
-    
-    [s fs_appendDictionaryStartWithIndentString:indent];
-    [self addBasicElementsToDebugDescription:s locale:locale indentString:indent indentLevel:level];
-    [s fs_appendDictionaryKey:@"_hasMoreElements" value:[NSNumber numberWithBool:[self hasMoreElements]] locale:locale indentString:indent indentLevel:level+1];
-    [s fs_appendDictionaryEndWithIndentString:indent];
-    
-    return s;
-}
 #pragma mark - FSGEDCOMStructure
 + (BOOL)respondsTo:(ByteBuffer *)buff { return NO; }
 + (BOOL)respondsTo:(ByteBuffer *)buff parentObject:(FSGEDCOMStructure *)parent
@@ -184,18 +170,6 @@
 @end
 
 @implementation FSGEDCOMFile
-- (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level
-{
-    NSMutableString * s = [[NSMutableString alloc] init];
-    NSString * indent = [NSString fs_stringByFillingWithCharacter:' ' repeated:4*level];
-    
-    [s fs_appendDictionaryStartWithIndentString:indent];
-    [self addBasicElementsToDebugDescription:s locale:locale indentString:indent indentLevel:level];
-    [s fs_appendDictionaryKey:@"_hasMoreElements" value:[NSNumber numberWithBool:[self hasMoreElements]] locale:locale indentString:indent indentLevel:level+1];
-    [s fs_appendDictionaryEndWithIndentString:indent];
-
-    return s;
-}
 #pragma mark - FSGEDCOMStructure
 + (BOOL)respondsTo:(ByteBuffer *)buff { return NO; }
 + (BOOL)respondsTo:(ByteBuffer *)buff parentObject:(FSGEDCOMStructure *)parent
@@ -208,18 +182,6 @@
 @end
 
 @implementation FSGEDCOMDestination
-- (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level
-{
-    NSMutableString * s = [[NSMutableString alloc] init];
-    NSString * indent = [NSString fs_stringByFillingWithCharacter:' ' repeated:4*level];
-    
-    [s fs_appendDictionaryStartWithIndentString:indent];
-    [self addBasicElementsToDebugDescription:s locale:locale indentString:indent indentLevel:level];
-    [s fs_appendDictionaryKey:@"_hasMoreElements" value:[NSNumber numberWithBool:[self hasMoreElements]] locale:locale indentString:indent indentLevel:level+1];
-    [s fs_appendDictionaryEndWithIndentString:indent];
-
-    return s;
-}
 #pragma mark - FSGEDCOMStructure
 + (BOOL)respondsTo:(ByteBuffer *)buff { return NO; }
 + (BOOL)respondsTo:(ByteBuffer *)buff parentObject:(FSGEDCOMStructure *)parent
