@@ -11,43 +11,55 @@
 #import "FSGEDCOMStructure.h"
 
 @class FSGEDCOMHeaderSource;
-@class FSGEDCOMHeaderSourceName;
-@class FSGEDCOMCharset;
-@class FSGEDCOMCharsetVersion;
-@class FSGEDCOMFile;
-@class FSGEDCOMDestination;
+@class FSGEDCOMHeaderGEDCOM;
+@class FSGEDCOMHeaderCharset;
+@class FSGEDCOMHeaderCharsetVersion;
+@class FSGEDCOMHeaderFile;
+@class FSGEDCOMHeaderDestination;
 
 @interface FSGEDCOMHead : FSGEDCOMStructure {
     FSGEDCOMHeaderSource * _source;
-    FSGEDCOMCharset * _charset;
-    FSGEDCOMFile * _file;
-    FSGEDCOMDestination * _destination;
+    FSGEDCOMHeaderGEDCOM * _gedcom;
+    FSGEDCOMHeaderCharset * _charset;
+    FSGEDCOMHeaderFile * _file;
+    FSGEDCOMHeaderDestination * _destination;
 }
 
 @property (readwrite, strong) FSGEDCOMHeaderSource * source;
-@property (readwrite, strong) FSGEDCOMCharset * charset;
-@property (readwrite, strong) FSGEDCOMFile * file;
-@property (readwrite, strong) FSGEDCOMDestination * destination;
+@property (readwrite, strong) FSGEDCOMHeaderGEDCOM * gedcom;
+@property (readwrite, strong) FSGEDCOMHeaderCharset * charset;
+@property (readwrite, strong) FSGEDCOMHeaderFile * file;
+@property (readwrite, strong) FSGEDCOMHeaderDestination * destination;
 
 @end
 
 @interface FSGEDCOMHeaderSource : FSGEDCOMStructure {
-    FSGEDCOMHeaderSourceName * _name;
+    NSString * _name;
+    NSString * _version;
 }
-@property (readwrite, strong) FSGEDCOMHeaderSourceName * name;
+@property (readwrite, strong) NSString * name;
+@property (readwrite, strong) NSString * version;
 - (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level;
 @end
-@interface FSGEDCOMHeaderSourceName : FSGEDCOMStructure
+@interface FSGEDCOMHeaderSourceVersion : FSGEDCOMStructure
 @end
-@interface FSGEDCOMCharset : FSGEDCOMStructure {
-    FSGEDCOMCharsetVersion * _charsetVersion;
+@interface FSGEDCOMHeaderGEDCOM : FSGEDCOMStructure {
+    NSString * _version;
+    NSString * _form;
 }
-@property (readwrite, strong) FSGEDCOMCharsetVersion * charsetVersion;
+@property (readwrite, strong) NSString * version;
+@property (readwrite, strong) NSString * form;
 - (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level;
 @end
-@interface FSGEDCOMCharsetVersion : FSGEDCOMStructure
+@interface FSGEDCOMHeaderCharset : FSGEDCOMStructure {
+    FSGEDCOMHeaderCharsetVersion * _charsetVersion;
+}
+@property (readwrite, strong) FSGEDCOMHeaderCharsetVersion * charsetVersion;
+- (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level;
 @end
-@interface FSGEDCOMFile : FSGEDCOMStructure
+@interface FSGEDCOMHeaderCharsetVersion : FSGEDCOMStructure
 @end
-@interface FSGEDCOMDestination : FSGEDCOMStructure
+@interface FSGEDCOMHeaderFile : FSGEDCOMStructure
+@end
+@interface FSGEDCOMHeaderDestination : FSGEDCOMStructure
 @end
