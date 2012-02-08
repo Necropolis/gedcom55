@@ -94,8 +94,10 @@
     self.source = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"SOUR"];
     self.gedcom = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"GEDC"];
     self.charset = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"CHAR"];
-    self.file = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"FILE"];
-    self.destination = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"DEST"];
+    FSGEDCOMStructure * __file = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"FILE"];
+    self.file = !!__file?__file.value:nil;
+    FSGEDCOMStructure * __destination = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"DEST"];
+    self.destination = !!__destination?__destination.value:nil;
 }
 
 #pragma mark NSObject
@@ -208,30 +210,6 @@
 + (BOOL)respondsTo:(ByteBuffer *)buff parentObject:(FSGEDCOMStructure *)parent
 {
     if (0==memcmp(buff->_bytes+2, "VERS", 4) && [parent isKindOfClass:[FSGEDCOMHeaderCharset class]]) return YES;
-    else return NO;
-}
-#pragma mark NSObject
-+ (void)load { [super load]; }
-@end
-
-@implementation FSGEDCOMHeaderFile
-#pragma mark FSGEDCOMStructure
-+ (BOOL)respondsTo:(ByteBuffer *)buff { return NO; }
-+ (BOOL)respondsTo:(ByteBuffer *)buff parentObject:(FSGEDCOMStructure *)parent
-{
-    if (0==memcmp(buff->_bytes+2, "FILE", 4) && [parent isKindOfClass:[FSGEDCOMHead class]]) return YES;
-    else return NO;
-}
-#pragma mark NSObject
-+ (void)load { [super load]; }
-@end
-
-@implementation FSGEDCOMHeaderDestination
-#pragma mark FSGEDCOMStructure
-+ (BOOL)respondsTo:(ByteBuffer *)buff { return NO; }
-+ (BOOL)respondsTo:(ByteBuffer *)buff parentObject:(FSGEDCOMStructure *)parent
-{
-    if (0==memcmp(buff->_bytes+2, "DEST", 4) && [parent isKindOfClass:[FSGEDCOMHead class]]) return YES;
     else return NO;
 }
 #pragma mark NSObject

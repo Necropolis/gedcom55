@@ -14,22 +14,20 @@
 @class FSGEDCOMHeaderGEDCOM;
 @class FSGEDCOMHeaderCharset;
 @class FSGEDCOMHeaderCharsetVersion;
-@class FSGEDCOMHeaderFile;
-@class FSGEDCOMHeaderDestination;
 
 @interface FSGEDCOMHead : FSGEDCOMStructure {
     FSGEDCOMHeaderSource * _source;
     FSGEDCOMHeaderGEDCOM * _gedcom;
     FSGEDCOMHeaderCharset * _charset;
-    FSGEDCOMHeaderFile * _file;
-    FSGEDCOMHeaderDestination * _destination;
+    NSString * _file;
+    NSString * _destination;
 }
 
 @property (readwrite, strong) FSGEDCOMHeaderSource * source;
 @property (readwrite, strong) FSGEDCOMHeaderGEDCOM * gedcom;
 @property (readwrite, strong) FSGEDCOMHeaderCharset * charset;
-@property (readwrite, strong) FSGEDCOMHeaderFile * file;
-@property (readwrite, strong) FSGEDCOMHeaderDestination * destination;
+@property (readwrite, strong) NSString * file;
+@property (readwrite, strong) NSString * destination;
 
 @end
 
@@ -58,8 +56,4 @@
 - (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level;
 @end
 @interface FSGEDCOMHeaderCharsetVersion : FSGEDCOMStructure
-@end
-@interface FSGEDCOMHeaderFile : FSGEDCOMStructure
-@end
-@interface FSGEDCOMHeaderDestination : FSGEDCOMStructure
 @end
