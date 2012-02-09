@@ -16,6 +16,7 @@ extern const struct FSGEDCOMErrorCode {
 @interface FSGEDCOM : NSObject
 
 @property (readwrite, strong) NSMutableArray * structures;
+@property (readwrite, strong) NSMutableDictionary * individuals;
 
 - (NSDictionary*)parse:(NSData*)data;
 

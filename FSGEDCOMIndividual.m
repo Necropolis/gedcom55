@@ -53,6 +53,7 @@
     self.value = self.key;
     self.key = tmp;
     self.individualId = [self.value stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"@"]];
+    [dg.individuals setObject:self forKey:self.individualId]; // register myself as an individual
 }
 
 #pragma mark - NSObject

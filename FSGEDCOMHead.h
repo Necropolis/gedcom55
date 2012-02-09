@@ -11,6 +11,7 @@
 #import "FSGEDCOMStructure.h"
 
 @class FSGEDCOMHeaderSource;
+@class FSGEDCOMHeaderSourceCorporation;
 @class FSGEDCOMHeaderGEDCOM;
 @class FSGEDCOMHeaderCharset;
 @class FSGEDCOMHeaderCharsetVersion;
@@ -34,12 +35,24 @@
 @interface FSGEDCOMHeaderSource : FSGEDCOMStructure {
     NSString * _name;
     NSString * _version;
+    FSGEDCOMHeaderSourceCorporation * _corporation;
 }
 @property (readwrite, strong) NSString * name;
 @property (readwrite, strong) NSString * version;
+@property (readwrite, strong) FSGEDCOMHeaderSourceCorporation * corporation;
 - (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level;
 @end
-@interface FSGEDCOMHeaderSourceVersion : FSGEDCOMStructure
+@interface FSGEDCOMHeaderSourceCorporation : FSGEDCOMStructure {
+    NSString * _phone;
+    NSString * _www;
+    NSString * _email;
+    NSString * _addr;
+}
+@property (readwrite, strong) NSString * phone;
+@property (readwrite, strong) NSString * www;
+@property (readwrite, strong) NSString * email;
+@property (readwrite, strong) NSString * addr;
+- (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level;
 @end
 @interface FSGEDCOMHeaderGEDCOM : FSGEDCOMStructure {
     NSString * _version;

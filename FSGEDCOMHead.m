@@ -109,6 +109,7 @@
 @implementation FSGEDCOMHeaderSource
 @synthesize name=_name;
 @synthesize version=_version;
+@synthesize corporation=_corporation;
 - (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level
 {
     NSMutableString * s = [[NSMutableString alloc] init];
@@ -118,6 +119,7 @@
     [self addBasicElementsToDebugDescription:s locale:locale indentString:indent indentLevel:level];
     [s fs_appendDictionaryKey:@"_name" value:_name locale:locale indentString:indent indentLevel:level+1];
     [s fs_appendDictionaryKey:@"_version" value:_version locale:locale indentString:indent indentLevel:level+1];
+    [s fs_appendDictionaryKey:@"_corporation" value:_corporation locale:locale indentString:indent indentLevel:level+1];
     [s fs_appendDictionaryEndWithIndentString:indent];
     
     return s;
@@ -132,11 +134,56 @@
 - (void)postParse:(FSGEDCOM *)dg
 {
     FSGEDCOMStructure * __name, * __version;
-    __name = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"NAME"];
+    __name =    [self firstElementOfTypeAndRemoveKeyIfEmpty:@"NAME"];
     __version = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"VERS"];
     
-    self.name = !!__name?__name.value:nil;
-    self.version = !!__version?__version.value:nil;
+    self.name       = !!__name      ?__name.value   :nil;
+    self.version    = !!__version   ?__version.value:nil;
+    self.corporation= [self firstElementOfTypeAndRemoveKeyIfEmpty:@"CORP"];
+}
+#pragma mark NSObject
++ (void)load { [super load]; }
+@end
+
+@implementation FSGEDCOMHeaderSourceCorporation
+@synthesize phone=_phone;
+@synthesize www=_www;
+@synthesize email=_email;
+@synthesize addr=_addr;
+- (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level
+{
+    NSMutableString * s = [[NSMutableString alloc] init];
+    NSString * indent = [NSString fs_stringByFillingWithCharacter:' ' repeated:level*4];
+    
+    [s fs_appendDictionaryStartWithIndentString:indent];
+    [self addBasicElementsToDebugDescription:s locale:locale indentString:indent indentLevel:level];
+    [s fs_appendDictionaryKey:@"_phone" value:_phone locale:locale indentString:indent indentLevel:level+1];
+    [s fs_appendDictionaryKey:@"_www" value:_www locale:locale indentString:indent indentLevel:level+1];
+    [s fs_appendDictionaryKey:@"_email" value:_email locale:locale indentString:indent indentLevel:level+1];
+    [s fs_appendDictionaryKey:@"_addr" value:_addr locale:locale indentString:indent indentLevel:level+1];
+    [s fs_appendDictionaryEndWithIndentString:indent];
+    
+    return s;
+}
+#pragma mark FSGEDCOMStructure
++ (BOOL)respondsTo:(ByteBuffer *)buff { return NO; }
++ (BOOL)respondsTo:(ByteBuffer *)buff parentObject:(FSGEDCOMStructure *)parent
+{
+    if (0==memcmp(buff->_bytes+2, "CORP", 4) && [parent isKindOfClass:[FSGEDCOMHeaderSource class]]) return YES;
+    else return NO;
+}
+- (void)postParse:(FSGEDCOM *)dg
+{
+    FSGEDCOMStructure * __phone, * __www, * __email, * __addr;
+    __phone = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"PHON"   ];
+    __www   = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"WWW"    ];
+    __email = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"EMAIL"  ];
+    __addr  = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"ADDR"   ];
+    
+    self.phone      = !!__phone     ?__phone.value  :nil;
+    self.www        = !!__www       ?__www.value    :nil;
+    self.email      = !!__email     ?__email.value  :nil;
+    self.addr       = !!__addr      ?__addr.value   :nil; // Will drop other address elements from deprecated fields
 }
 #pragma mark NSObject
 + (void)load { [super load]; }

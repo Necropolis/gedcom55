@@ -28,6 +28,7 @@
 }
 
 @synthesize structures=_structures;
+@synthesize individuals=_individuals;
 
 - (NSDictionary*)parse:(NSData*)data
 {
