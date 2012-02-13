@@ -7,17 +7,21 @@
 //
 
 #import "FSGEDCOM.h"
+#import "FSGEDCOM+ParserInternal.h"
 
 #import "FSGEDCOMStructure.h"
+#import "FSGEDCOMFamily.h"
+#import "FSGEDCOMIndividual.h"
 
 #import "ByteBuffer.h"
 #import "ByteSequence.h"
 
 #import "NSContainers+DebugPrint.h"
 
-@interface FSGEDCOM (__parser_common__)
+@interface FSGEDCOM ()
 
-+ (NSArray*)allStructureClasses;
+@property (readwrite, strong) NSMutableDictionary * familyCallbacks;
+@property (readwrite, strong) NSMutableDictionary * individualCallbacks;
 
 - (FSGEDCOMStructure*)parseStructure:(ByteBuffer *)buff;
 
@@ -25,10 +29,16 @@
 
 @implementation FSGEDCOM {
     NSMutableDictionary * _warnings;
+    NSMutableDictionary * _familyCallbacks;
+    NSMutableDictionary * _individualCallbacks;
 }
 
 @synthesize structures=_structures;
 @synthesize individuals=_individuals;
+@synthesize families=_families;
+
+@synthesize familyCallbacks=_familyCallbacks;
+@synthesize individualCallbacks=_individualCallbacks;
 
 - (NSDictionary*)parse:(NSData*)data
 {
@@ -67,9 +77,6 @@
         
     }
     
-//    [NSObject fs_swizzleContainerPrinters:&error];
-//    if (error) NSLog(@"Failed to swizzle stuff back to normal");
-    
     return _warnings;
 }
 
@@ -79,19 +86,49 @@
     [[_warnings objectForKey:type] addObject:warning];
 }
 
+- (void)registerFamily:(FSGEDCOMFamily *)family
+{
+    [self.families setObject:family forKey:family.value];
+    NSMutableArray * callbacks = [self.familyCallbacks objectForKey:family.value];
+    if (!callbacks) return;
+    for (FSGEDCOMFamilyCallback callback in callbacks) callback(family);
+    [self.familyCallbacks removeObjectForKey:family.value];
+}
+
+- (void)registerCallback:(FSGEDCOMFamilyCallback)callback forFamily:(NSString *)family
+{
+    if (![self.familyCallbacks objectForKey:family]) [self.familyCallbacks setObject:[NSMutableArray array] forKey:family];
+    [[self.familyCallbacks objectForKey:family] addObject:callback];
+}
+
+- (void)registerIndividual:(FSGEDCOMIndividual *)individual
+{
+    [self.individuals setObject:individual forKey:individual.value];
+    NSMutableArray * callbacks = [self.individualCallbacks objectForKey:individual.value];
+    if (!callbacks) return;
+    for (FSGEDCOMIndividualCallback callback in callbacks) callback(individual);
+    [self.individualCallbacks removeObjectForKey:individual.value];
+}
+
+- (void)registerCallback:(FSGEDCOMIndividualCallback)callback forIndividual:(NSString *)individual
+{
+    if (![self.individualCallbacks objectForKey:individual]) [self.individualCallbacks setObject:[NSMutableArray array] forKey:individual];
+    [[self.individualCallbacks objectForKey:individual] addObject:callback];
+}
+
 - (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level
 {
     NSMutableString * str = [[NSMutableString alloc] init];
-    char * indent = malloc(sizeof(char)*4*level+1);
-    memset(indent, ' ', sizeof(char)*4*level);
-    indent[4*level]='\0';
+    NSString * indent = [NSString fs_stringByFillingWithCharacter:' ' repeated:level*4];
     
-    [str appendFormat:@"%s{\n",indent];
-    [str appendFormat:@"%s    records = %@;\n",indent,[_structures descriptionWithLocale:locale indent:level+1]];
-    [str appendFormat:@"%s    parseWarnings = %@;\n",indent,[_warnings descriptionWithLocale:locale indent:level+1]];
-    [str appendFormat:@"%s}",indent];
+    // kill the _EVDEF's coz they're freaking stupid
+    NSArray * arr = [_structures filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"key != \"_EVDEF\""]];
     
-    free(indent);
+    [str fs_appendDictionaryStartWithIndentString:indent];
+    [str fs_appendDictionaryKey:@"records" value:arr locale:locale indentString:indent indentLevel:level+1];
+    [str fs_appendDictionaryKey:@"parseWarnings" value:_warnings locale:locale indentString:indent indentLevel:level+1];
+    [str fs_appendDictionaryEndWithIndentString:indent];
+    
     return str;
 }
 
@@ -115,6 +152,7 @@
 
     _structures = [[NSMutableArray alloc] init];
     _warnings = [[NSMutableDictionary alloc] init];
+    _families = [[NSMutableDictionary alloc] init];
     
     return self;
 }

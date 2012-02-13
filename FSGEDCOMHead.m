@@ -9,6 +9,7 @@
 #import "FSGEDCOMHead.h"
 
 #import "FSGEDCOM.h"
+#import "FSGEDCOM+ParserInternal.h"
 
 #import "ByteBuffer.h"
 #import "ByteSequence.h"

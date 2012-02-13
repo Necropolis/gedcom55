@@ -8,6 +8,9 @@
 
 #import <Foundation/Foundation.h>
 
+@class FSGEDCOMFamily;
+@class FSGEDCOMIndividual;
+
 extern const struct FSGEDCOMErrorCode {
     __unsafe_unretained NSString* UnsupportedEncoding;
     __unsafe_unretained NSString* UnknownEncoding;
@@ -17,9 +20,8 @@ extern const struct FSGEDCOMErrorCode {
 
 @property (readwrite, strong) NSMutableArray * structures;
 @property (readwrite, strong) NSMutableDictionary * individuals;
+@property (readwrite, strong) NSMutableDictionary * families;
 
 - (NSDictionary*)parse:(NSData*)data;
-
-- (void)addWarning:(NSString *)warning ofType:(NSString *)type;
 
 @end

@@ -1,27 +1,27 @@
 //
-//  FSGEDCOMIndividual.m
+//  FSGEDCOMFamily.m
 //  GEDCOM 5.5
 //
-//  Created by Christopher Miller on 2/3/12.
+//  Created by Christopher Miller on 2/13/12.
 //  Copyright (c) 2012 Christopher Miller. All rights reserved.
 //
 
-#import "FSGEDCOMIndividual.h"
+#import "FSGEDCOMFamily.h"
 
 #import "FSGEDCOM+ParserInternal.h"
 
 #import "ByteBuffer.h"
 #import "ByteSequence.h"
 
-@implementation FSGEDCOMIndividual
+@implementation FSGEDCOMFamily
 
-#pragma mark - FSGEDCOMStructure
+#pragma mark FSGEDCOMStructure
 
 + (BOOL)respondsTo:(ByteBuffer *)buff
 {
     // 0123456789
-    // 0 @1@ INDI
-    // 0 @I1@ INDI
+    // 0 @1@ FAM
+    // 0 @I1@ FAM
     ByteBuffer * firstLine =
     [buff byteBufferWithRange:[buff scanUntilOneOfByteSequences:[ByteSequence newlineByteSequences]]];
     
@@ -36,7 +36,7 @@
     memchr(atSign, '@', atSign-firstLine->_bytes);
     if (NULL==secondAtSign) return NO; // needs to have at least two
     
-    if (0==memcmp(&firstLine->_bytes[firstLine->_length-5], " INDI", 5))
+    if (0==memcmp(&firstLine->_bytes[firstLine->_length-4], " FAM", 4))
         return YES; // totally an INDI record
     
     return NO;
@@ -44,7 +44,7 @@
 
 + (BOOL)respondsTo:(ByteBuffer *)buff parentObject:(FSGEDCOMStructure *)parent
 {
-    return [[self class] respondsTo:buff];
+    return NO;
 }
 
 - (void)postParse:(FSGEDCOM *)dg
@@ -52,10 +52,10 @@
     NSString * tmp = self.value;
     self.value = [self.key stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"@"]];
     self.key = tmp;
-    [dg registerIndividual:self];
+    [dg registerFamily:self];
 }
 
-#pragma mark - NSObject
+#pragma mark NSObject
 
 + (void)load { [super load]; }
 
