@@ -97,6 +97,8 @@
 
 - (void)registerCallback:(FSGEDCOMFamilyCallback)callback forFamily:(NSString *)family
 {
+    FSGEDCOMFamily * _family = [self.families objectForKey:family];
+    if (_family) { callback(_family); return; }
     if (![self.familyCallbacks objectForKey:family]) [self.familyCallbacks setObject:[NSMutableArray array] forKey:family];
     [[self.familyCallbacks objectForKey:family] addObject:callback];
 }
@@ -112,6 +114,8 @@
 
 - (void)registerCallback:(FSGEDCOMIndividualCallback)callback forIndividual:(NSString *)individual
 {
+    FSGEDCOMIndividual * _individual = [self.individuals objectForKey:individual];
+    if (_individual) { callback(_individual); return; }
     if (![self.individualCallbacks objectForKey:individual]) [self.individualCallbacks setObject:[NSMutableArray array] forKey:individual];
     [[self.individualCallbacks objectForKey:individual] addObject:callback];
 }
