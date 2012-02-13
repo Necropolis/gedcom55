@@ -30,9 +30,9 @@
     
     [s fs_appendDictionaryStartWithIndentString:indent];
     [self addBasicElementsToDebugDescription:s locale:locale indentString:indent indentLevel:level];
-    [s fs_appendDictionaryKey:@"_husband" value:_husband locale:locale indentString:indent indentLevel:level+1];
-    [s fs_appendDictionaryKey:@"_wife" value:_wife locale:locale indentString:indent indentLevel:level+1];
-    [s fs_appendDictionaryKey:@"_children" value:_children locale:locale indentString:indent indentLevel:level+1];
+    [s fs_appendDictionaryKey:@"_husband" value:_husband.value locale:locale indentString:indent indentLevel:level+1];
+    [s fs_appendDictionaryKey:@"_wife" value:_wife.value locale:locale indentString:indent indentLevel:level+1];
+    [s fs_appendDictionaryKey:@"_children" value:[_children valueForKeyPath:@"value"] locale:locale indentString:indent indentLevel:level+1];
     [s fs_appendDictionaryEndWithIndentString:indent];
     
     return s;
