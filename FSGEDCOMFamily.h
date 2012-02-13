@@ -12,13 +12,13 @@
 
 @interface FSGEDCOMFamily : FSGEDCOMStructure {
 @protected
-    FSGEDCOMIndividual * _husband;
-    FSGEDCOMIndividual * _wife;
+    __weak FSGEDCOMIndividual * _husband;
+    __weak FSGEDCOMIndividual * _wife;
     NSMutableArray * _children;
 }
 
-@property (readwrite, strong) FSGEDCOMIndividual * husband;
-@property (readwrite, strong) FSGEDCOMIndividual * wife;
+@property (readwrite, weak) FSGEDCOMIndividual * husband;
+@property (readwrite, weak) FSGEDCOMIndividual * wife;
 @property (readwrite, strong) NSMutableArray * children;
 
 @end

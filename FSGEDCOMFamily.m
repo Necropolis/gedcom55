@@ -10,15 +10,33 @@
 
 #import "FSGEDCOM+ParserInternal.h"
 #import "FSGEDCOMIndividual.h"
+#import "FSGEDCOMWeakProxy.h"
 
 #import "ByteBuffer.h"
 #import "ByteSequence.h"
+
+#import "NSContainers+DebugPrint.h"
 
 @implementation FSGEDCOMFamily
 
 @synthesize husband=_husband;
 @synthesize wife=_wife;
 @synthesize children=_children;
+
+- (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level
+{
+    NSMutableString * s = [[NSMutableString alloc] init];
+    NSString * indent = [NSString fs_stringByFillingWithCharacter:' ' repeated:level*4];
+    
+    [s fs_appendDictionaryStartWithIndentString:indent];
+    [self addBasicElementsToDebugDescription:s locale:locale indentString:indent indentLevel:level];
+    [s fs_appendDictionaryKey:@"_husband" value:_husband locale:locale indentString:indent indentLevel:level+1];
+    [s fs_appendDictionaryKey:@"_wife" value:_wife locale:locale indentString:indent indentLevel:level+1];
+    [s fs_appendDictionaryKey:@"_children" value:_children locale:locale indentString:indent indentLevel:level+1];
+    [s fs_appendDictionaryEndWithIndentString:indent];
+    
+    return s;
+}
 
 #pragma mark FSGEDCOMStructure
 
@@ -66,23 +84,21 @@
         if (1<[arr count]) [dg addWarning:@"Too many husbands in this family! Poligamy much?" ofType:@"Too Many People"];
         _rec = [arr objectAtIndex:0];
         if (_rec) {
-            tmp = _rec.value;
-            _rec.value = [_rec.key stringByTrimmingCharactersInSet:atSign];
-            _rec.key = tmp;
+            _rec.value = [_rec.value stringByTrimmingCharactersInSet:atSign];
             [dg registerCallback:^(FSGEDCOMIndividual * husband) { self.husband = husband; } forIndividual:_rec.value]; // actually some pretty spiffy functional programming
         }
     }
+    [self.elements removeObjectForKey:@"HUSB"]; // get rid of stupid old memory
     arr = [self.elements objectForKey:@"WIFE"];
     if (arr) {
         if (1<[arr count]) [dg addWarning:@"Too many wives in this family! Poligamy much?" ofType:@"Too Many People"];
         _rec = [arr objectAtIndex:0];
         if (_rec) {
-            tmp = _rec.value;
-            _rec.value = [_rec.key stringByTrimmingCharactersInSet:atSign];
-            _rec.key = tmp;
+            _rec.value = [_rec.value stringByTrimmingCharactersInSet:atSign];
             [dg registerCallback:^(FSGEDCOMIndividual * wife) { self.wife = wife; } forIndividual:_rec.value];
         }
     }
+    [self.elements removeObjectForKey:@"WIFE"]; // back in the kitchen! I mean... memory cleanup
     arr = [self.elements objectForKey:@"CHIL"]; // freakin children
     if (arr) {
         self.children = [[NSMutableArray alloc] initWithCapacity:[arr count]];
@@ -95,12 +111,11 @@
              i < [arr count];
              ++i) {
             _rec = [arr objectAtIndex:i];
-            tmp = _rec.value;
-            _rec.value = [_rec.key stringByTrimmingCharactersInSet:atSign];
-            _rec.key = tmp;
-            [dg registerCallback:^(FSGEDCOMIndividual * child) { [self.children replaceObjectAtIndex:i withObject:child]; } forIndividual:_rec.value];
+            _rec.value = [_rec.value stringByTrimmingCharactersInSet:atSign];
+            [dg registerCallback:^(FSGEDCOMIndividual * child) { [self.children replaceObjectAtIndex:i withObject:[FSGEDCOMWeakProxy weakProxyWithObject:child]]; } forIndividual:_rec.value];
         }
     }
+    [self.elements removeObjectForKey:@"CHIL"]; // don't you wish killing all your children were that easy?
 }
 
 #pragma mark NSObject
