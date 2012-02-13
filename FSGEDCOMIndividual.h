@@ -8,6 +8,12 @@
 
 #import "FSGEDCOMStructure.h"
 
-@interface FSGEDCOMIndividual : FSGEDCOMStructure
+@interface FSGEDCOMIndividual : FSGEDCOMStructure {
+    NSMutableArray * _familiesWhereChild;
+    NSMutableArray * _familiesWhereSpouse;
+}
+
+@property (readwrite, strong) NSMutableArray * familiesWhereChild;
+@property (readwrite, strong) NSMutableArray * familiesWhereSpouse;
 
 @end

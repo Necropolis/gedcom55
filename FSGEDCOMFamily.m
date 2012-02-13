@@ -81,7 +81,7 @@
     NSMutableArray * arr = [self.elements objectForKey:@"HUSB"];
     FSGEDCOMStructure * _rec = nil;
     if (arr) {
-        if (1<[arr count]) [dg addWarning:@"Too many husbands in this family! Poligamy much?" ofType:@"Too Many People"];
+        if (1<[arr count]) [dg addWarning:@"Too many husbands in this family! Polygamy much?" ofType:@"Too Many People"];
         _rec = [arr objectAtIndex:0];
         if (_rec) {
             _rec.value = [_rec.value stringByTrimmingCharactersInSet:atSign];
@@ -91,7 +91,7 @@
     [self.elements removeObjectForKey:@"HUSB"]; // get rid of stupid old memory
     arr = [self.elements objectForKey:@"WIFE"];
     if (arr) {
-        if (1<[arr count]) [dg addWarning:@"Too many wives in this family! Poligamy much?" ofType:@"Too Many People"];
+        if (1<[arr count]) [dg addWarning:@"Too many wives in this family! Polygamy much?" ofType:@"Too Many People"];
         _rec = [arr objectAtIndex:0];
         if (_rec) {
             _rec.value = [_rec.value stringByTrimmingCharactersInSet:atSign];
@@ -112,10 +112,7 @@
              ++i) {
             _rec = [arr objectAtIndex:i];
             _rec.value = [_rec.value stringByTrimmingCharactersInSet:atSign];
-            [dg registerCallback:^(FSGEDCOMIndividual * child) {
-                NSLog(@"Replacing object at index %lu with %@", i, child);
-                [self.children replaceObjectAtIndex:i withObject:[FSGEDCOMWeakProxy weakProxyWithObject:child]];
-            } forIndividual:_rec.value];
+            [dg registerCallback:^(FSGEDCOMIndividual * child) { [self.children replaceObjectAtIndex:i withObject:[FSGEDCOMWeakProxy weakProxyWithObject:child]]; } forIndividual:_rec.value];
         }
     }
     [self.elements removeObjectForKey:@"CHIL"]; // don't you wish killing all your children were that easy?

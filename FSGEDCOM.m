@@ -100,7 +100,7 @@
     FSGEDCOMFamily * _family = [self.families objectForKey:family];
     if (_family) { callback(_family); return; }
     if (![self.familyCallbacks objectForKey:family]) [self.familyCallbacks setObject:[NSMutableArray array] forKey:family];
-    [[self.familyCallbacks objectForKey:family] addObject:callback];
+    [[self.familyCallbacks objectForKey:family] addObject:[callback copy]];
 }
 
 - (void)registerIndividual:(FSGEDCOMIndividual *)individual
@@ -117,7 +117,7 @@
     FSGEDCOMIndividual * _individual = [self.individuals objectForKey:individual];
     if (_individual) { callback(_individual); return; }
     if (![self.individualCallbacks objectForKey:individual]) [self.individualCallbacks setObject:[NSMutableArray array] forKey:individual];
-    [[self.individualCallbacks objectForKey:individual] addObject:callback];
+    [[self.individualCallbacks objectForKey:individual] addObject:[callback copy]];
 }
 
 - (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level
@@ -157,7 +157,9 @@
     _structures = [[NSMutableArray alloc] init];
     _warnings = [[NSMutableDictionary alloc] init];
     _families = [[NSMutableDictionary alloc] init];
+    _familyCallbacks = [[NSMutableDictionary alloc] init];
     _individuals = [[NSMutableDictionary alloc] init];
+    _individualCallbacks = [[NSMutableDictionary alloc] init];
     
     return self;
 }
