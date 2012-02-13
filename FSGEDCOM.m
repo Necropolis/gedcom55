@@ -157,6 +157,7 @@
     _structures = [[NSMutableArray alloc] init];
     _warnings = [[NSMutableDictionary alloc] init];
     _families = [[NSMutableDictionary alloc] init];
+    _individuals = [[NSMutableDictionary alloc] init];
     
     return self;
 }

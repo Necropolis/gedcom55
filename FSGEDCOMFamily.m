@@ -112,7 +112,10 @@
              ++i) {
             _rec = [arr objectAtIndex:i];
             _rec.value = [_rec.value stringByTrimmingCharactersInSet:atSign];
-            [dg registerCallback:^(FSGEDCOMIndividual * child) { [self.children replaceObjectAtIndex:i withObject:[FSGEDCOMWeakProxy weakProxyWithObject:child]]; } forIndividual:_rec.value];
+            [dg registerCallback:^(FSGEDCOMIndividual * child) {
+                NSLog(@"Replacing object at index %lu with %@", i, child);
+                [self.children replaceObjectAtIndex:i withObject:[FSGEDCOMWeakProxy weakProxyWithObject:child]];
+            } forIndividual:_rec.value];
         }
     }
     [self.elements removeObjectForKey:@"CHIL"]; // don't you wish killing all your children were that easy?
