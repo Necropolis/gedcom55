@@ -102,18 +102,12 @@
     arr = [self.elements objectForKey:@"CHIL"]; // freakin children
     if (arr) {
         self.children = [[NSMutableArray alloc] initWithCapacity:[arr count]];
-        for (NSUInteger i = 0;
-             i < [arr count];
-             ++i) { // fill in children with nulls so that replace-object can honor the order in which they appear in the GEDCOM file.
+        [arr enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
             [self.children addObject:[NSNull null]];
-        }
-        for (NSUInteger i = 0;
-             i < [arr count];
-             ++i) {
-            _rec = [arr objectAtIndex:i];
+            FSGEDCOMStructure * _rec = [arr objectAtIndex:idx];
             _rec.value = [_rec.value stringByTrimmingCharactersInSet:atSign];
-            [dg registerCallback:^(FSGEDCOMIndividual * child) { [self.children replaceObjectAtIndex:i withObject:[FSGEDCOMWeakProxy weakProxyWithObject:child]]; } forIndividual:_rec.value];
-        }
+            [dg registerCallback:^(FSGEDCOMIndividual * child) { [self.children replaceObjectAtIndex:idx withObject:[FSGEDCOMWeakProxy weakProxyWithObject:child]]; } forIndividual:_rec.value];
+        }];
     }
     [self.elements removeObjectForKey:@"CHIL"]; // don't you wish killing all your children were that easy?
 }

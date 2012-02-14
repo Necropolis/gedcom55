@@ -77,6 +77,25 @@
         
     }
     
+    // pull out individuals and families; put them into their arrays
+    
+    NSMutableArray * toRemove = [[NSMutableArray alloc] init];
+    [self.structures enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        if ([obj isKindOfClass:[FSGEDCOMIndividual class]]||[obj isKindOfClass:[FSGEDCOMFamily class]]) {
+            [toRemove addObject:obj];
+        }
+    }];
+    [_structures removeObjectsInArray:toRemove];
+    toRemove = nil;
+    NSArray * arr = [_familyCallbacks allKeys];
+    if (0<[arr count])
+        [self addWarning:[NSString stringWithFormat:@"References to families (%@) found, but they were never ever defined!", [arr componentsJoinedByString:@","]] ofType:@"Missing Families"];
+    arr = [_individualCallbacks allKeys];
+    if (0<[arr count])
+        [self addWarning:[NSString stringWithFormat:@"References to individuals (%@) found, but they were never ever defined!", [arr componentsJoinedByString:@","]] ofType:@"Missing Persons"];
+    self.familyCallbacks = nil; // clean up parser nonsense
+    self.individualCallbacks = nil;
+    
     return _warnings;
 }
 
@@ -130,6 +149,8 @@
     
     [str fs_appendDictionaryStartWithIndentString:indent];
     [str fs_appendDictionaryKey:@"records" value:arr locale:locale indentString:indent indentLevel:level+1];
+    [str fs_appendDictionaryKey:@"individuals" value:_individuals locale:locale indentString:indent indentLevel:level+1];
+    [str fs_appendDictionaryKey:@"families" value:_families locale:locale indentString:indent indentLevel:level+1];
     [str fs_appendDictionaryKey:@"parseWarnings" value:_warnings locale:locale indentString:indent indentLevel:level+1];
     [str fs_appendDictionaryEndWithIndentString:indent];
     
