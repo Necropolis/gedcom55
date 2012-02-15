@@ -15,7 +15,6 @@
 #import "ByteSequence.h"
 #import "BytePrinting.h"
 
-NSString * kLongLines = @"longLines";
 size_t kMaxLineLength = 255;
 
 @implementation FSGEDCOMStructure
@@ -78,7 +77,7 @@ size_t kMaxLineLength = 255;
 //        NSLog(@"Line: %@", line);
     size_t l = [line length];
     if (l>=kMaxLineLength) {
-        [dg addWarning:[NSString stringWithFormat:@"Found a line of length %lu which is longer than %lu beginning at offset %lu", l, kMaxLineLength, [recordPart globalOffsetOfByte:0]] ofType:kLongLines];
+        [dg addWarning:[NSString stringWithFormat:@"Found a line of length %lu which is longer than %lu beginning at offset %lu", l, kMaxLineLength, [recordPart globalOffsetOfByte:0]] ofType:FSGEDCOMErrorCode.LongLine];
     }
     NSRange _recordTypeRange = [recordPart scanUntilOneOfByteSequences:[[ByteSequence newlineByteSequences] arrayByAddingObjectsFromArray:[ByteSequence whitespaceByteSequences]]];
     NSRange _recordBodyRange = [recordPart scanUntilOneOfByteSequences:[ByteSequence newlineByteSequences]];

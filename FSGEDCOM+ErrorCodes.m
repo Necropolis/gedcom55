@@ -10,5 +10,10 @@
 
 const struct FSGEDCOMErrorCode FSGEDCOMErrorCode = {
     .UnsupportedEncoding = @"Unsupported Encoding",
-    .UnknownEncoding = @"Unknown Encoding"
+    .UnknownEncoding = @"Unknown Encoding",
+    .LongLine = @"Long Line",
+    .MissingRequiredElement = @"Missing Required Element",
+    .TooManyElements = @"Too Many Elements",
+    .SpecificationBreach = @"Specification Breach",
+    .TooManyPeople = @"Too Many People"
 };

@@ -12,8 +12,13 @@
 @class FSGEDCOMIndividual;
 
 extern const struct FSGEDCOMErrorCode {
-    __unsafe_unretained NSString* UnsupportedEncoding;
-    __unsafe_unretained NSString* UnknownEncoding;
+    __unsafe_unretained NSString * UnsupportedEncoding;
+    __unsafe_unretained NSString * UnknownEncoding;
+    __unsafe_unretained NSString * LongLine;
+    __unsafe_unretained NSString * MissingRequiredElement;
+    __unsafe_unretained NSString * TooManyElements;
+    __unsafe_unretained NSString * SpecificationBreach;
+    __unsafe_unretained NSString * TooManyPeople;
 } FSGEDCOMErrorCode;
 
 @interface FSGEDCOM : NSObject

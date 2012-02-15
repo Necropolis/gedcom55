@@ -64,7 +64,7 @@
                               @"CHAR", nil];
     for (NSString * requiredKey in requiredKeys)
         if (nil==[self.elements valueForKey:requiredKey])
-            [dg addWarning:[NSString stringWithFormat:@"HEAD record structure lacks a %@ entry. This is illegal per the GEDCOM spec.", requiredKey] ofType:@"missingRequiredElement"];
+            [dg addWarning:[NSString stringWithFormat:@"HEAD record structure lacks a %@ entry. This is illegal per the GEDCOM spec.", requiredKey] ofType:FSGEDCOMErrorCode.MissingRequiredElement];
     
     NSArray * atMostOneOf = [NSArray arrayWithObjects:
                              @"SOUR.VERS",
@@ -87,10 +87,10 @@
     
     for (NSString * atMostOneOfKey in atMostOneOf)
         if (nil!=[self.elements valueForKeyPath:atMostOneOfKey]) if (1<[[self.elements valueForKeyPath:atMostOneOfKey] count])
-            [dg addWarning:[NSString stringWithFormat:@"HEAD record has more than one %@ substructure, which is illegal per the GEDCOM spec.", atMostOneOfKey] ofType:@"tooManyElements"];
+            [dg addWarning:[NSString stringWithFormat:@"HEAD record has more than one %@ substructure, which is illegal per the GEDCOM spec.", atMostOneOfKey] ofType:FSGEDCOMErrorCode.TooManyElements];
     
     if (nil!=[self.elements objectForKey:@"PLAC"]&&(nil==[self.elements valueForKeyPath:@"PLAC.FORM"]||1<[[self.elements valueForKeyPath:@"PLAC.FORM"] count]))
-        [dg addWarning:@"HEAD record's PLAC substructure lacks a FORM definition or has too many of them, which is illegal per the GEDCOM spec." ofType:@"specBreach"];
+        [dg addWarning:@"HEAD record's PLAC substructure lacks a FORM definition or has too many of them, which is illegal per the GEDCOM spec." ofType:FSGEDCOMErrorCode.SpecificationBreach];
     
     self.source = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"SOUR"];
     self.gedcom = [self firstElementOfTypeAndRemoveKeyIfEmpty:@"GEDC"];
