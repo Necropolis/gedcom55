@@ -46,4 +46,6 @@ extern size_t kMaxLineLength;
 
 - (BOOL)hasMoreElements;
 
+- (NSString *)descriptionWithLocale:(id)locale indent:(NSUInteger)level;
+
 @end
